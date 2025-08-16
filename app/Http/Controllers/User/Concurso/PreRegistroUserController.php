@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
 use App\Models\PagoPreRegistro;
+use App\Models\PagoTerceroTransferenciaConcurso;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -50,12 +51,12 @@ class PreRegistroUserController extends Controller
         $request->validate([
             'concurso_id' => 'required|exists:concursos,id',
             'nombre_equipo' => 'required|string|max:255',
-            'integrantes' => 'required|integer|min:1|max:5',
             'asesor' => 'nullable|string|max:255',
             'institucion' => 'nullable|string|max:255',
             'estado_pdr' => 'nullable|string',
             'archivo_pdr' => 'required|file|mimes:pdf,doc,docx|max:10240',
-            'integrantes_data' => 'required|array|min:1',
+            'codigo_pago_terceros' => 'nullable|string|max:100',
+            'integrantes_data' => 'required|array|min:1|max:5',
             'integrantes_data.*.nombre_completo' => 'required|string|max:255',
             'integrantes_data.*.matricula' => 'required|string|max:50',
             'integrantes_data.*.carrera' => 'required|string|max:255',
@@ -75,22 +76,34 @@ class PreRegistroUserController extends Controller
                 ->with('error', 'Ya tienes un pre-registro para este concurso.');
         }
 
-        // Validar pago confirmado
+        // Validar pago confirmado (PayPal) o pago de terceros validado
+        $pagoConfirmado = null;
+        $pagoTerceroValidado = null;
+        
+        // Verificar pago PayPal confirmado
         $pagoConfirmado = PagoPreRegistro::where('usuario_id', Auth::id())
             ->where('concurso_id', $request->concurso_id)
             ->where('estado_pago', 'pagado')
             ->first();
+        
+        // Verificar pago de terceros validado si se proporciona código
+        if ($request->codigo_pago_terceros) {
+            $pagoTerceroValidado = PagoTerceroTransferenciaConcurso::where('codigo_validacion_unico', $request->codigo_pago_terceros)
+                ->where('concurso_id', $request->concurso_id)
+                ->where('estado_pago', 'validado')
+                ->where('cubre_pre_registro', true)
+                ->first();
+        }
 
-        if (!$pagoConfirmado) {
+        if (!$pagoConfirmado && !$pagoTerceroValidado) {
             return redirect()->back()
-                ->with('error', 'Debe tener un pago confirmado para realizar el pre-registro');
+                ->with('error', 'Debe tener un pago confirmado (PayPal) o un código de pago de terceros validado para realizar el pre-registro');
         }
 
         // Crear el pre-registro
-        $preRegistro = PreRegistroConcurso::create([
+        $preRegistroData = [
             'usuario_id' => Auth::id(),
             'concurso_id' => $request->concurso_id,
-            'pago_pre_registro_id' => $pagoConfirmado->id,
             'nombre_equipo' => $request->nombre_equipo,
             'integrantes' => count($request->integrantes_data),
             'asesor' => $request->asesor,
@@ -99,7 +112,19 @@ class PreRegistroUserController extends Controller
             'estado_pdr' => 'pendiente',
             'archivo_pdr' => $this->storeFile($request->file('archivo_pdr')),
             'integrantes_data' => $request->integrantes_data
-        ]);
+        ];
+        
+        // Asignar el tipo de pago correspondiente
+        if ($pagoConfirmado) {
+            $preRegistroData['pago_pre_registro_id'] = $pagoConfirmado->id;
+        }
+        
+        if ($pagoTerceroValidado) {
+            $preRegistroData['pagos_terceros_transferencia_concurso_id'] = $pagoTerceroValidado->id;
+            $preRegistroData['codigo_pago_terceros'] = $request->codigo_pago_terceros;
+        }
+        
+        $preRegistro = PreRegistroConcurso::create($preRegistroData);
 
         return redirect()->route('user.concursos.pre-registros.index')
             ->with('success', 'Pre-registro creado exitosamente');
@@ -123,9 +148,24 @@ class PreRegistroUserController extends Controller
 
     public function factura(PreRegistroConcurso $preRegistro)
     {
+        // Verificar si es un pago PayPal o pago de terceros
+        if ($preRegistro->pago_pre_registro_id) {
+            // Pago PayPal
+            $pago = PagoPreRegistro::with(['usuario', 'concurso'])
+                ->findOrFail($preRegistro->pago_pre_registro_id);
+            return $this->generarFacturaPayPal($pago);
+        } elseif ($preRegistro->pagos_terceros_transferencia_concurso_id) {
+            // Pago de terceros
+            $pagoTercero = PagoTerceroTransferenciaConcurso::with(['usuario', 'concurso'])
+                ->findOrFail($preRegistro->pagos_terceros_transferencia_concurso_id);
+            return $this->generarFacturaTerceros($pagoTercero);
+        }
         
-        $pago = PagoPreRegistro::with(['usuario', 'concurso'])
-            ->findOrFail($preRegistro->pago_pre_registro_id);
+        return redirect()->back()->with('error', 'No se encontró información de pago para generar la factura.');
+    }
+    
+    private function generarFacturaPayPal($pago)
+    {
 
         $detalles = json_decode($pago->detalles_transaccion, true);
 
@@ -185,6 +225,32 @@ class PreRegistroUserController extends Controller
         $pdf = PDF::loadView('factura', ['datos' => $datosFactura]);
         return $pdf->download('ticket_'.$pago->id.'.pdf');
     }
+    
+    private function generarFacturaTerceros($pagoTercero)
+    {
+        $datosFactura = [
+            'id' => $pagoTercero->id,
+            'usuario' => $pagoTercero->usuario->name,
+            'email' => $pagoTercero->usuario->email,
+            'concurso' => $pagoTercero->concurso->titulo,
+            'monto' => $pagoTercero->monto_total,
+            'metodo_pago' => 'Transferencia Bancaria',
+            'referencia_transferencia' => $pagoTercero->referencia_transferencia,
+            'estado_pago' => $pagoTercero->estado_pago,
+            'fecha_pago' => $pagoTercero->fecha_pago ? Carbon::parse($pagoTercero->fecha_pago)->format('Y-m-d H:i:s') : null,
+            'tipo_tercero' => $pagoTercero->tipo_tercero,
+            'nombre_tercero' => $pagoTercero->nombre_tercero,
+            'rfc_tercero' => $pagoTercero->rfc_tercero,
+            'contacto_tercero' => $pagoTercero->contacto_tercero,
+            'correo_tercero' => $pagoTercero->correo_tercero,
+            'codigo_validacion' => $pagoTercero->codigo_validacion_unico,
+            'cubre_pre_registro' => $pagoTercero->cubre_pre_registro,
+            'cubre_inscripcion' => $pagoTercero->cubre_inscripcion
+        ];
+
+        $pdf = PDF::loadView('factura', ['datos' => $datosFactura]);
+        return $pdf->download('ticket_tercero_'.$pagoTercero->id.'.pdf');
+    }
 
     public function update(Request $request, PreRegistroConcurso $preRegistro)
     {
@@ -196,6 +262,7 @@ class PreRegistroUserController extends Controller
             'comentarios' => 'nullable|string',
             'estado_pdr' => 'nullable|string',
             'archivo_pdr' => 'nullable|file|mimes:pdf,doc,docx|max:10240',
+            'codigo_pago_terceros' => 'nullable|string|max:100',
             'integrantes_data' => 'required|array|min:1',
             'integrantes_data.*.nombre_completo' => 'required|string|max:255',
             'integrantes_data.*.matricula' => 'required|string|max:50',
@@ -216,6 +283,11 @@ class PreRegistroUserController extends Controller
         // Mantener el estado_pdr actual si no se proporciona uno nuevo
         if ($request->has('estado_pdr')) {
             $updateData['estado_pdr'] = $request->estado_pdr;
+        }
+        
+        // Actualizar código de pago de terceros si se proporciona
+        if ($request->has('codigo_pago_terceros')) {
+            $updateData['codigo_pago_terceros'] = $request->codigo_pago_terceros;
         }
 
         // Manejar la actualización del archivo PDR

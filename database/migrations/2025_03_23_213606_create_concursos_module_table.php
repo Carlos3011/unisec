@@ -88,13 +88,35 @@ return new class extends Migration
             $table->string('comprobante_pago')->nullable();  // Archivo o evidencia del pago
             $table->timestamps();  // Registra las fechas de creación y actualización.
         });
+        Schema::create('pagos_terceros_transferencia_concurso', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');  // Relación con la tabla 'users'
+            $table->foreignId('concurso_id')->constrained('concursos')->onDelete('cascade');  // Relación con la tabla 'concursos'
+            $table->enum('tipo_tercero', ['universidad', 'empresa', 'persona_fisica'])->default('persona_fisica');
+            $table->string('nombre_tercero');
+            $table->string('rfc_tercero')->nullable();
+            $table->string('contacto_tercero');
+            $table->string('correo_tercero');
+            $table->string('comprobante_pago')->nullable();
+            $table->decimal('monto_total', 10, 2);
+            $table->enum('estado_pago', ['pendiente', 'validado', 'rechazado'])->default('pendiente');
+            $table->string('referencia_transferencia')->nullable();
+            $table->integer('numero_pagos')->unsigned()->default(1);
+            $table->boolean('cubre_pre_registro')->default(false);
+            $table->boolean('cubre_inscripcion')->default(false);
+            $table->string('codigo_validacion_unico', 100);
+            $table->timestamp('fecha_pago')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
 
         // 2. Creación de la tabla 'pre_registro_concursos' para almacenar los pre-registros después del pago inicial
         Schema::create('pre_registro_concursos', function (Blueprint $table) {
             $table->id();  // Clave primaria.
             $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');  // Relación con la tabla 'users'
             $table->foreignId('concurso_id')->constrained('concursos')->onDelete('cascade');  // Relación con la tabla 'concursos'
-            $table->foreignId('pago_pre_registro_id')->constrained('pagos_pre_registro')->onDelete('cascade');  // Relación con el pago previo
+            $table->foreignId('pago_pre_registro_id')->nullable()->constrained('pagos_pre_registro')->onDelete('cascade');  // Relación con el pago previo
+            $table->foreignId('pagos_terceros_transferencia_concurso_id')->nullable()->constrained('pagos_terceros_transferencia_concurso', 'id', 'pago_tercero_fk')->onDelete('cascade');  // Relación con el pago previo
             $table->string('nombre_equipo');  // Nombre del equipo.
             $table->integer('integrantes')->unsigned()->default(1);  // Número de integrantes en el equipo.
             $table->string('asesor')->nullable();  // Asesor del equipo (opcional).
@@ -150,27 +172,7 @@ return new class extends Migration
             $table->softDeletes();  // Permite el borrado suave de las inscripciones.
         });
 
-        Schema::create('pagos_terceros_transferencia_concurso', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');  // Relación con la tabla 'users'
-            $table->foreignId('concurso_id')->constrained('concursos')->onDelete('cascade');  // Relación con la tabla 'concursos'
-            $table->enum('tipo_tercero', ['universidad', 'empresa', 'persona_fisica'])->default('persona_fisica');
-            $table->string('nombre_tercero');
-            $table->string('rfc_tercero')->nullable();
-            $table->string('contacto_tercero');
-            $table->string('correo_tercero');
-            $table->string('comprobante_pago')->nullable();
-            $table->decimal('monto_total', 10, 2);
-            $table->enum('estado_pago', ['pendiente', 'validado', 'rechazado'])->default('pendiente');
-            $table->string('referencia_transferencia')->nullable();
-            $table->integer('numero_pagos')->unsigned()->default(1);
-            $table->boolean('cubre_pre_registro')->default(false);
-            $table->boolean('cubre_inscripcion')->default(false);
-            $table->string('codigo_validacion_unico', 100);
-            $table->timestamp('fecha_pago')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        
     }
 
     /**
@@ -182,8 +184,8 @@ return new class extends Migration
         Schema::dropIfExists('inscripciones_concursos');
         Schema::dropIfExists('pagos_inscripcion');
         Schema::dropIfExists('pre_registro_concursos');
-        Schema::dropIfExists('pagos_pre_registro');
         Schema::dropIfExists('pagos_terceros_transferencia_concurso');
+        Schema::dropIfExists('pagos_pre_registro');
         Schema::dropIfExists('imagenes_concursos');
         Schema::dropIfExists('fechas_importantes_concursos');
         Schema::dropIfExists('convocatorias_concursos');

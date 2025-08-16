@@ -45,6 +45,7 @@
                     <div class="space-y-2">
                         <label class="block text-sm font-medium text-gray-300">Concurso</label>
                         <input type="hidden" name="concurso_id" value="{{ $concursos->first()->id }}">
+                        <input type="hidden" name="comentarios" value="">
                         <div class="bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-3 text-white font-medium backdrop-blur-sm">
                             {{ $concursos->first()->titulo }}
                         </div>
@@ -82,6 +83,15 @@
                         <label for="institucion" class="block text-sm font-medium text-gray-300">Institución</label>
                         <input type="text" name="institucion" id="institucion" value="{{ old('institucion') }}" required
                             class="w-full bg-gray-800/50 border border-gray-700/50 text-white rounded-lg px-4 py-3 focus:border-orange-500 focus:ring-orange-500/50 backdrop-blur-sm transition-all duration-300 hover:border-gray-600/70 focus:hover:border-orange-500">
+                    </div>
+
+                    <!-- Código de Pago de Terceros -->
+                    <div class="space-y-2">
+                        <label for="codigo_pago_terceros" class="block text-sm font-medium text-gray-300">Código de Pago de Terceros (Opcional)</label>
+                        <input type="text" name="codigo_pago_terceros" id="codigo_pago_terceros" value="{{ old('codigo_pago_terceros') }}"
+                            class="w-full bg-gray-800/50 border border-gray-700/50 text-white rounded-lg px-4 py-3 focus:border-blue-500 focus:ring-blue-500/50 backdrop-blur-sm transition-all duration-300 hover:border-gray-600/70 focus:hover:border-blue-500"
+                            placeholder="Ingrese el código si realizó pago por transferencia">
+                        <p class="text-sm text-gray-400">Solo necesario si realizó el pago por transferencia bancaria</p>
                     </div>
 
                     <!-- Archivo PDR -->
@@ -202,10 +212,9 @@
         }
     }
 
-    // Inicializar los campos de integrantes al cargar la página
+    // Inicializar con un integrante al cargar la página
     document.addEventListener('DOMContentLoaded', function() {
-        const cantidadInicial = document.getElementById('integrantes').value;
-        actualizarIntegrantes(cantidadInicial);
+        actualizarIntegrantes(1);
     });
 </script>
 
