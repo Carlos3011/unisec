@@ -31,6 +31,73 @@
                         Convocatorias abiertas: Participa en nuestro Concurso de Innovación y asiste al Congreso Científico.
                     </p>
 
+                    <!-- Card de Anuncio de Cambios de Fechas -->
+                    <div class="mb-12 max-w-4xl mx-auto" data-aos="fade-down" data-aos-delay="100">
+                        <a href="{{ route("convocatorias.index") }}" class="block group cursor-pointer">
+                            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-cyan-400/90 via-cyan-400/70 to-cyan-400/50 p-8 shadow-2xl border-2 border-cyan-400/40 attention-blink transition-all duration-300 group-hover:scale-105 group-hover:shadow-3xl group-hover:border-cyan-300/60">
+                            <!-- Efectos de fondo -->
+                            <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-400/20 rounded-full blur-3xl transform translate-x-8 -translate-y-8"></div>
+                            <div class="absolute bottom-0 left-0 w-24 h-24 bg-red-400/20 rounded-full blur-2xl transform -translate-x-4 translate-y-4"></div>
+                            
+                            <!-- Contenido del anuncio -->
+                            <div class="relative z-10 text-center">
+                                <div class="flex justify-center mb-6">
+                                    <div class="p-4 bg-white/20 rounded-full border-2 border-white/40 shadow-lg">
+                                        <i class="fas fa-exclamation-triangle text-4xl text-white animate-pulse"></i>
+                                    </div>
+                                </div>
+                                
+                                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 drop-shadow-lg">
+                                    ¡Atención! Cambios de Fechas
+                                </h2>
+                                
+                                <p class="text-xl text-white/95 mb-6 font-medium leading-relaxed">
+                                    Se han actualizado las fechas importantes para concursos y congresos.
+                                    <br class="hidden md:block">
+                                    Revisa las nuevas fechas en cada convocatoria.
+                                </p>
+                                
+                                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                                    <div class="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 border border-white/30">
+                                        <span class="text-white font-semibold text-lg">
+                                            <i class="fas fa-calendar-alt mr-2"></i>
+                                            Fechas Actualizadas
+                                        </span>
+                                    </div>
+                                    <div class="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3 border border-white/30">
+                                        <span class="text-white font-semibold text-lg">
+                                            <i class="fas fa-bell mr-2"></i>
+                                            Revisa tu Convocatoria
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Borde animado -->
+                            <div class="absolute inset-0 rounded-3xl border-2 border-white/30 animate-pulse group-hover:border-white/50"></div>
+                        </div>
+                        </a>
+                    </div>
+
+                    <!-- Estilos para el efecto de parpadeo -->
+                    <style>
+                        @keyframes attention-blink {
+                            0%, 5%, 10%, 15%, 100% {
+                                opacity: 1;
+                                transform: scale(1);
+                            }
+                            2.5%, 7.5%, 12.5% {
+                                opacity: 0.7;
+                                transform: scale(0.98);
+                            }
+                        }
+                        
+                        .attention-blink {
+                            animation: attention-blink 30s infinite;
+                        }
+                    </style>
+
                     <div class="flex flex-col sm:flex-row justify-center gap-8 pt-4">
                         <!-- Botón Concurso -->
                         @if($convocatorias->count() > 0)
@@ -154,7 +221,7 @@
     </div>
 
     <!-- PROXIMOS EVENTOS -->
-    <section class="py-20 " data-aos="fade-in">
+    <section id="proximos-eventos" class="py-20 " data-aos="fade-in">
         <div class="max-w-7xl mx-auto px-6">
             <!-- Encabezado de la Sección -->
             <div class="flex flex-col md:flex-row justify-between items-center mb-16">
