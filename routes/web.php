@@ -45,6 +45,7 @@ use App\Http\Controllers\User\Congreso\InscripcionCongresoUserController;
 
 use App\Http\Controllers\PayPalController;
 use App\Http\Controllers\PayPalInscripcionController;
+use App\Http\Controllers\WebPayController;
 
 use App\Models\ConvocatoriaConcurso;
 use App\Models\ConvocatoriaCongreso;
@@ -333,6 +334,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Rutas de WebPay sin middleware de autenticación para permitir notificaciones externas
+Route::post('/webpay/notify', [WebPayController::class, 'notify'])->name('webpay.notify'); // URL POST para MIT
+Route::get('/webpay/result', [WebPayController::class, 'result'])->name('webpay.result');   // URL para el usuario
 
 require __DIR__ . '/auth.php';
 
