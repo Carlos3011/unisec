@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 use App\Http\Controllers\Controller;
-use App\Models\PagoPreRegistro;
+use App\Models\PagoPaypalConcurso;
 use App\Models\User;
 use App\Models\Concurso;
 use Illuminate\Http\Request;
@@ -16,7 +16,8 @@ class PagoPreRegistroController extends Controller
 {
     public function index(Request $request)
     {
-        $query = PagoPreRegistro::with(['usuario', 'concurso'])
+        $query = PagoPaypalConcurso::with(['usuario', 'concurso'])
+            ->where('tipo_pago', PagoPaypalConcurso::TIPO_PRE_REGISTRO)
             ->orderBy('created_at', 'desc');
 
         // Filtros
@@ -91,7 +92,7 @@ class PagoPreRegistroController extends Controller
 
     public function show($id)
     {
-        $pago = PagoPreRegistro::with(['usuario', 'concurso'])->findOrFail($id);
+        $pago = PagoPaypalConcurso::with(['usuario', 'concurso'])->findOrFail($id);
         $detalles = json_decode($pago->detalles_transaccion, true);
 
         $datosPago = [
@@ -152,7 +153,7 @@ class PagoPreRegistroController extends Controller
 
     public function generarFactura($id)
     {
-        $pago = PagoPreRegistro::with(['usuario', 'concurso'])->findOrFail($id);
+        $pago = PagoPaypalConcurso::with(['usuario', 'concurso'])->findOrFail($id);
         $detalles = json_decode($pago->detalles_transaccion, true);
 
         $datosFactura = [
@@ -214,7 +215,8 @@ class PagoPreRegistroController extends Controller
 
     public function exportarPagos(Request $request)
     {
-        $pagos = PagoPreRegistro::with(['usuario', 'concurso'])
+        $pagos = PagoPaypalConcurso::with(['usuario', 'concurso'])
+            ->where('tipo_pago', PagoPaypalConcurso::TIPO_PRE_REGISTRO)
             ->when($request->estado_pago, function ($query, $estado) {
                 return $query->where('estado_pago', $estado);
             })

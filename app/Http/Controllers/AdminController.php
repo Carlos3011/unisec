@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PagoPreRegistro;
+use App\Models\PagoPaypalConcurso;
 use App\Models\PagoInscripcionCongreso;
 use App\Models\User;
 use App\Models\InscripcionCongreso;
@@ -29,11 +29,12 @@ class AdminController extends Controller
         ->get();
 
         // Estadísticas de pagos
-        $pagosPreRegistro = PagoPreRegistro::select(
+        $pagosPreRegistro = PagoPaypalConcurso::select(
             DB::raw('DATE(fecha_pago) as fecha'),
             DB::raw('SUM(monto) as total')
         )
         ->where('estado_pago', 'pagado')
+        ->where('tipo_pago', PagoPaypalConcurso::TIPO_PRE_REGISTRO)
         ->groupBy('fecha')
         ->orderBy('fecha')
         ->get();

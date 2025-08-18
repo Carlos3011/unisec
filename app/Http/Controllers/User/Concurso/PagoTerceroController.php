@@ -33,12 +33,15 @@ class PagoTerceroController extends Controller
             ->findOrFail($id);
 
         $usosTotales = $pago->numero_pagos;
-        $usosRealizadosPre = PreRegistroConcurso::where('pago_pre_registro_id', $pago->id)->count();
-        $usosRealizadosIns = InscripcionConcurso::where('pago_inscripcion_id', $pago->id)->count();
+        $usosRealizadosPre = PreRegistroConcurso::where('codigo_pago_terceros', $pago->codigo_validacion_unico)->count();
+        $usosRealizadosIns = InscripcionConcurso::where('codigo_pago_terceros', $pago->codigo_validacion_unico)->count();
 
-        $usosDisponibles = $usosTotales - ($usosRealizadosPre + $usosRealizadosIns);
-        $usosDisponiblesPre = $pago->cubre_pre_registro ? max(0, $usosTotales - $usosRealizadosPre - $usosRealizadosIns) : 0;
-        $usosDisponiblesIns = $pago->cubre_inscripcion ? max(0, $usosTotales - $usosRealizadosPre - $usosRealizadosIns) : 0;
+        // Calcular usos disponibles por tipo por separado
+        $usosDisponiblesPre = $pago->cubre_pre_registro ? max(0, $usosTotales - $usosRealizadosPre) : 0;
+        $usosDisponiblesIns = $pago->cubre_inscripcion ? max(0, $usosTotales - $usosRealizadosIns) : 0;
+        
+        // Calcular usos disponibles totales (para mostrar información general)
+        $usosDisponibles = $usosDisponiblesPre + $usosDisponiblesIns;
 
         return view('user.concursos.pagos-terceros.show', compact('pago', 'usosDisponibles', 'usosDisponiblesPre', 'usosDisponiblesIns'));
     }
@@ -164,16 +167,34 @@ class PagoTerceroController extends Controller
             return response()->json(['error' => 'Código inválido o no encontrado'], 404);
         }
 
-        $usosActuales = $this->contarUsosCodigo($pagoTercero->id);
-        if ($usosActuales >= $pagoTercero->numero_pagos) {
-            return response()->json(['error' => 'El código ha alcanzado el límite de usos permitidos'], 400);
+        // Contar usos por separado para cada tipo
+        $usosPreRegistro = PreRegistroConcurso::where('codigo_pago_terceros', $pagoTercero->codigo_validacion_unico)->count();
+        $usosInscripcion = InscripcionConcurso::where('codigo_pago_terceros', $pagoTercero->codigo_validacion_unico)->count();
+
+        // Calcular usos disponibles por tipo
+        $usosDisponiblesPre = 0;
+        $usosDisponiblesIns = 0;
+
+        if ($pagoTercero->cubre_pre_registro) {
+            $usosDisponiblesPre = max(0, $pagoTercero->numero_pagos - $usosPreRegistro);
         }
 
-        $usosDisponiblesPre = $pagoTercero->cubre_pre_registro ? max(0, $pagoTercero->numero_pagos - $usosActuales) : 0;
-        $usosDisponiblesIns = $pagoTercero->cubre_inscripcion ? max(0, $pagoTercero->numero_pagos - $usosActuales) : 0;
+        if ($pagoTercero->cubre_inscripcion) {
+            $usosDisponiblesIns = max(0, $pagoTercero->numero_pagos - $usosInscripcion);
+        }
+
+        // Verificar si hay al menos un uso disponible para algún tipo
+        if ($usosDisponiblesPre == 0 && $usosDisponiblesIns == 0) {
+            return response()->json(['error' => 'El código ha alcanzado el límite de usos permitidos para todos los tipos'], 400);
+        }
+
+        // Obtener la convocatoria correspondiente al concurso
+        $convocatoria = ConvocatoriaConcurso::where('concurso_id', $pagoTercero->concurso_id)->first();
 
         return response()->json([
             'valid' => true,
+            'concurso_id' => $pagoTercero->concurso_id,
+            'convocatoria_id' => $convocatoria ? $convocatoria->id : null,
             'usosDisponiblesPre' => $usosDisponiblesPre,
             'usosDisponiblesIns' => $usosDisponiblesIns,
             'message' => 'Validación exitosa. ' .
@@ -185,17 +206,18 @@ class PagoTerceroController extends Controller
     public function usarCodigoEnPreRegistro($codigo, $preRegistroId)
     {
         $preRegistro = PreRegistroConcurso::findOrFail($preRegistroId);
-        $pagoTercero = PagoTerceroTransferenciaConcurso::where('codigo_validacion', $codigo)
+        $pagoTercero = PagoTerceroTransferenciaConcurso::where('codigo_validacion_unico', $codigo)
             ->where('concurso_id', $preRegistro->concurso_id)
-            ->where('estado', 'validado')
+            ->where('estado_pago', 'validado')
             ->first();
 
         if (!$pagoTercero || !$pagoTercero->cubre_pre_registro) {
             return false;
         }
 
-        $usosActuales = $this->contarUsosCodigo($pagoTercero->id);
-        if ($usosActuales >= $pagoTercero->numero_pagos) {
+        // Contar solo los usos de pre-registro para este código
+        $usosPreRegistro = PreRegistroConcurso::where('codigo_pago_terceros', $pagoTercero->codigo_validacion_unico)->count();
+        if ($usosPreRegistro >= $pagoTercero->numero_pagos) {
             return false;
         }
 
@@ -206,17 +228,18 @@ class PagoTerceroController extends Controller
     public function usarCodigoEnInscripcion($codigo, $inscripcionId)
     {
         $inscripcion = InscripcionConcurso::findOrFail($inscripcionId);
-        $pagoTercero = PagoTerceroTransferenciaConcurso::where('codigo_validacion', $codigo)
+        $pagoTercero = PagoTerceroTransferenciaConcurso::where('codigo_validacion_unico', $codigo)
             ->where('concurso_id', $inscripcion->concurso_id)
-            ->where('estado', 'validado')
+            ->where('estado_pago', 'validado')
             ->first();
 
         if (!$pagoTercero || !$pagoTercero->cubre_inscripcion) {
             return false;
         }
 
-        $usosActuales = $this->contarUsosCodigo($pagoTercero->id);
-        if ($usosActuales >= $pagoTercero->numero_pagos) {
+        // Contar solo los usos de inscripción para este código
+        $usosInscripcion = InscripcionConcurso::where('codigo_pago_terceros', $pagoTercero->codigo_validacion_unico)->count();
+        if ($usosInscripcion >= $pagoTercero->numero_pagos) {
             return false;
         }
 
@@ -236,10 +259,10 @@ class PagoTerceroController extends Controller
         return $montoTotal;
     }
 
-    private function contarUsosCodigo($pagoTerceroId)
+    private function contarUsosCodigo($codigoValidacion)
     {
-        $usosPreRegistro = PreRegistroConcurso::where('codigo_pago_terceros', $pagoTerceroId)->count();
-        $usosInscripcion = InscripcionConcurso::where('codigo_pago_terceros', $pagoTerceroId)->count();
+        $usosPreRegistro = PreRegistroConcurso::where('codigo_pago_terceros', $codigoValidacion)->count();
+        $usosInscripcion = InscripcionConcurso::where('codigo_pago_terceros', $codigoValidacion)->count();
         return $usosPreRegistro + $usosInscripcion;
     }
 }

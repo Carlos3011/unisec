@@ -14,7 +14,7 @@ class InscripcionConcurso extends Model
 
     protected $fillable = [
         'pre_registro_id',
-        'pago_inscripcion_id',
+        'pago_paypal_inscripcion_id',
         'usuario_id',
         'concurso_id',
         'estado',
@@ -54,9 +54,12 @@ class InscripcionConcurso extends Model
         return $this->belongsTo(PreRegistroConcurso::class, 'pre_registro_id');
     }
 
+    /**
+     * Obtiene el pago de PayPal de inscripción asociado.
+     */
     public function pagoInscripcion()
     {
-        return $this->belongsTo(PagoInscripcion::class, 'pago_inscripcion_id');
+        return $this->belongsTo(PagoPaypalConcurso::class, 'pago_paypal_inscripcion_id');
     }
 
     /**

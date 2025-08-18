@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\PagoPreRegistro;
+use App\Models\PagoPaypalConcurso;
 
 class PreRegistroConcurso extends Model
 {
@@ -16,7 +16,7 @@ class PreRegistroConcurso extends Model
     protected $fillable = [
         'usuario_id',
         'concurso_id',
-        'pago_pre_registro_id',
+        'pago_paypal_id',
         'pagos_terceros_transferencia_concurso_id',
         'nombre_equipo',
         'integrantes',
@@ -50,11 +50,11 @@ class PreRegistroConcurso extends Model
     }
 
     /**
-     * Obtiene el pago de pre-registro asociado (PayPal).
+     * Obtiene el pago de PayPal asociado al pre-registro.
      */
-    public function pagoPreRegistro()
+    public function pagoPaypal()
     {
-        return $this->belongsTo(PagoPreRegistro::class, 'pago_pre_registro_id');
+        return $this->belongsTo(PagoPaypalConcurso::class, 'pago_paypal_id');
     }
 
     public function inscripcion()
@@ -62,9 +62,13 @@ class PreRegistroConcurso extends Model
         return $this->hasOne(InscripcionConcurso::class);
     }
 
+    /**
+     * Obtiene el pago de inscripción asociado (PayPal).
+     */
     public function pagoInscripcion()
     {
-        return $this->hasOne(PagoInscripcion::class);
+        return $this->hasOne(PagoPaypalConcurso::class, 'pre_registro_id')
+                    ->where('tipo_pago', PagoPaypalConcurso::TIPO_INSCRIPCION);
     }
 
     /**

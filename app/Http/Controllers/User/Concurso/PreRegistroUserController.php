@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
-use App\Models\PagoPreRegistro;
+use App\Models\PagoPaypalConcurso;
 use App\Models\PagoTerceroTransferenciaConcurso;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -81,8 +81,9 @@ class PreRegistroUserController extends Controller
         $pagoTerceroValidado = null;
         
         // Verificar pago PayPal confirmado
-        $pagoConfirmado = PagoPreRegistro::where('usuario_id', Auth::id())
+        $pagoConfirmado = PagoPaypalConcurso::where('usuario_id', Auth::id())
             ->where('concurso_id', $request->concurso_id)
+            ->where('tipo_pago', PagoPaypalConcurso::TIPO_PRE_REGISTRO)
             ->where('estado_pago', 'pagado')
             ->first();
         
@@ -116,7 +117,7 @@ class PreRegistroUserController extends Controller
         
         // Asignar el tipo de pago correspondiente
         if ($pagoConfirmado) {
-            $preRegistroData['pago_pre_registro_id'] = $pagoConfirmado->id;
+            $preRegistroData['pago_paypal_id'] = $pagoConfirmado->id;
         }
         
         if ($pagoTerceroValidado) {
@@ -149,10 +150,10 @@ class PreRegistroUserController extends Controller
     public function factura(PreRegistroConcurso $preRegistro)
     {
         // Verificar si es un pago PayPal o pago de terceros
-        if ($preRegistro->pago_pre_registro_id) {
+        if ($preRegistro->pago_paypal_id) {
             // Pago PayPal
-            $pago = PagoPreRegistro::with(['usuario', 'concurso'])
-                ->findOrFail($preRegistro->pago_pre_registro_id);
+            $pago = PagoPaypalConcurso::with(['usuario', 'concurso'])
+                ->findOrFail($preRegistro->pago_paypal_id);
             return $this->generarFacturaPayPal($pago);
         } elseif ($preRegistro->pagos_terceros_transferencia_concurso_id) {
             // Pago de terceros
