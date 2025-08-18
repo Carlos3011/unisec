@@ -173,7 +173,7 @@
                                         </a>
                                         @endif
                                         
-                                        @if($inscripcion->pago_inscripcion_id)
+                                        @if($inscripcion->pagoInscripcion)
                                         <a href="{{ route('user.congresos.inscripciones.factura', $inscripcion) }}"
                                            class="text-green-400 hover:text-green-300 transition-colors inline-flex items-center gap-1.5 group"
                                            title="Descargar ticket">
@@ -264,7 +264,7 @@
                             </a>
                             @endif
                             
-                            @if($inscripcion->pago_inscripcion_id)
+                            @if($inscripcion->pagoInscripcion)
                             <a href="{{ route('user.congresos.inscripciones.factura', $inscripcion) }}"
                                class="flex-1 flex items-center justify-center space-x-2 px-3 py-2 rounded-lg bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/30 text-green-300 hover:text-green-200 transition-all">
                                 <i class="fas fa-file-invoice text-sm"></i>

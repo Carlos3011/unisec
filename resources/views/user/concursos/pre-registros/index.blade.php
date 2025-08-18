@@ -105,7 +105,7 @@
                                                         <span>Editar</span>
                                                     </a>
                                                 @endif
-                                                @if($preRegistro->pago_pre_registro_id)
+                                                @if($preRegistro->pago_paypal_id)
                                                     <a href="{{ route('user.concursos.pre-registros.factura', ['preRegistro' => $preRegistro->id]) }}"
                                                         class="text-green-400 hover:text-green-300 transition-colors inline-flex items-center gap-1.5">
                                                         <i class="fas fa-file-invoice"></i>

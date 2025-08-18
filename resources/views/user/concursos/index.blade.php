@@ -108,7 +108,8 @@
                                     </a>
                                 @else
                                     @php
-                                        $pagoConfirmado = \App\Models\PagoPreRegistro::where('usuario_id', Auth::id())
+                                        $pagoConfirmado = \App\Models\PagoPaypalConcurso::where('usuario_id', Auth::id())
+                                    ->where('tipo_pago', \App\Models\PagoPaypalConcurso::TIPO_PRE_REGISTRO)
                                             ->where('concurso_id', $concurso->id)
                                             ->where('estado_pago', 'pagado')
                                             ->exists();

@@ -157,13 +157,33 @@
                                         <i class="fas fa-info-circle mr-2"></i>Ver detalles
                                     </a>
                                     @php
-                                        $pagoConfirmado = \App\Models\PagoPreRegistro::where('usuario_id', Auth::id())
+                                        $pagoConfirmado = \App\Models\PagoPaypalConcurso::where('usuario_id', Auth::id())
+                                    ->where('tipo_pago', \App\Models\PagoPaypalConcurso::TIPO_PRE_REGISTRO)
                                             ->where('concurso_id', $concurso->id)
                                             ->where('estado_pago', 'pagado')
                                             ->exists();
                                             
+                                        // Verificar si el usuario tiene un pago de terceros validado para este concurso
                                         $pagoTercero = \App\Models\PagoTerceroTransferenciaConcurso::where('usuario_id', Auth::id())
                                             ->where('concurso_id', $concurso->id)
+                                            ->where('estado_pago', 'validado')
+                                            ->where('cubre_pre_registro', true)
+                                            ->exists();
+                                            
+                                        // También verificar si el usuario tiene un pre-registro con código de pago de terceros
+                                        $tienePreRegistroConCodigoTercero = \App\Models\PreRegistroConcurso::where('usuario_id', Auth::id())
+                                            ->where('concurso_id', $concurso->id)
+                                            ->whereNotNull('codigo_pago_terceros')
+                                            ->exists();
+                                            
+                                        // Combinar ambas verificaciones
+                                        $pagoTercero = $pagoTercero || $tienePreRegistroConCodigoTercero;
+                                            
+                                        // Solo mostrar pendiente si no tiene pre-registro con código de terceros
+                                        $pagoTerceroPendiente = !$tienePreRegistroConCodigoTercero && \App\Models\PagoTerceroTransferenciaConcurso::where('usuario_id', Auth::id())
+                                            ->where('concurso_id', $concurso->id)
+                                            ->where('cubre_pre_registro', true)
+                                            ->whereIn('estado_pago', ['pendiente', 'en_revision'])
                                             ->exists();
                                             
                                         $tienePreRegistro = \App\Models\PreRegistroConcurso::where('usuario_id', Auth::id())
@@ -172,9 +192,21 @@
                                     @endphp
 
                                     @if($pagoTercero)
-                                        <a href="{{ route('user.concursos.pagos-terceros.store') }}" 
-                                           class="inline-flex items-center justify-center px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded-xl hover:bg-cyan-500/30 transition-all duration-500">
-                                            <i class="fas fa-receipt mr-2"></i>Ver Estado de Pago
+                                        @if($tienePreRegistro)
+                                            <a href="{{ route('user.concursos.pre-registros.show', $tienePreRegistro->id) }}"
+                                            class="inline-flex items-center justify-center px-4 py-2 bg-green-500/20 text-green-400 rounded-xl hover:bg-green-500/30 transition-all duration-500">
+                                                <i class="fas fa-eye mr-2"></i>Ver Pre-registro
+                                            </a>
+                                        @else
+                                            <a href="{{ route('user.concursos.pre-registros.create', ['convocatoria' => $convocatoria->id]) }}" 
+                                            class="inline-flex items-center justify-center px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded-xl hover:bg-cyan-500/30 transition-all duration-500">
+                                                <i class="fas fa-user-plus mr-2"></i>Pre-registrarse
+                                            </a>
+                                        @endif
+                                    @elseif($pagoTerceroPendiente)
+                                        <a href="{{ route('user.concursos.pagos-terceros.index') }}" 
+                                           class="inline-flex items-center justify-center px-4 py-2 bg-orange-500/20 text-orange-400 rounded-xl hover:bg-orange-500/30 transition-all duration-500">
+                                            <i class="fas fa-clock mr-2"></i>Pago en Revisión
                                         </a>
                                     @elseif($pagoConfirmado)
                                         @if($tienePreRegistro)
