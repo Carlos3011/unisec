@@ -296,9 +296,46 @@
                         </div>
                         
                         <div class="flex flex-col items-center space-y-4">
+                            @php
+                        // Determinar el estado del pago considerando pagos de terceros
+                        $estadoPago = 'pendiente';
+                        $textoEstado = 'Pendiente';
+                        
+                        if ($inscripcion->pagoInscripcion && $inscripcion->pagoInscripcion->estado_pago === 'pagado') {
+                            $estadoPago = 'pagado';
+                            $textoEstado = 'Pagado';
+                        } elseif ($inscripcion->pagoInscripcion && $inscripcion->pagoInscripcion->estado_pago === 'rechazado') {
+                            $estadoPago = 'rechazado';
+                            $textoEstado = 'Rechazado';
+                        } elseif ($inscripcion->codigo_pago_terceros && $inscripcion->pagoTercero && $inscripcion->pagoTercero->estado_pago === 'validado') {
+                            $estadoPago = 'validado';
+                            $textoEstado = 'Validado (Pago de Terceros)';
+                        }
+                        
+                        // Calcular progreso basado en estado de inscripción y pago
+                        $estadoInscripcion = $inscripcion->estado ?? 'pendiente';
+                        $estadoPagoProgress = 'pendiente';
+                        
+                        if ($inscripcion->pagoInscripcion && $inscripcion->pagoInscripcion->estado_pago === 'pagado') {
+                            $estadoPagoProgress = 'pagado';
+                        } elseif ($inscripcion->codigo_pago_terceros && $inscripcion->pagoTercero && $inscripcion->pagoTercero->estado_pago === 'validado') {
+                            $estadoPagoProgress = 'pagado'; // Tratamos el pago validado de terceros como pagado
+                        }
+                        
+                        $progreso = 25; // Por defecto
+                        if ($estadoInscripcion === 'validado' && $estadoPagoProgress === 'pagado') {
+                            $progreso = 100;
+                        } elseif ($estadoInscripcion === 'validado' || $estadoPagoProgress === 'pagado') {
+                            $progreso = 75;
+                        } elseif ($estadoInscripcion === 'pendiente' && $estadoPagoProgress === 'pendiente') {
+                            $progreso = 50;
+                        }
+                    @endphp
+                            
                             <span class="px-5 py-2 rounded-full text-sm font-semibold flex items-center space-x-2
-                                @switch($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente')
+                                @switch($estadoPago)
                                     @case('pagado')
+                                    @case('validado')
                                         bg-green-500/20 text-green-300 border border-green-500/30 shadow-[0_0_15px_rgba(74,222,128,0.2)]
                                         @break
                                     @case('rechazado')
@@ -308,21 +345,22 @@
                                         bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.2)]
                                 @endswitch">
                                 <span class="w-2 h-2 rounded-full 
-                                    @switch($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente')
-                                        @case('pagado') bg-green-400 @break
+                                    @switch($estadoPago)
+                                        @case('pagado')
+                                        @case('validado') bg-green-400 @break
                                         @case('rechazado') bg-red-400 @break
                                         @default bg-yellow-400
                                     @endswitch"></span>
-                                <span>{{ ucfirst($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente') }}</span>
+                                <span>{{ $textoEstado }}</span>
                             </span>
                             
-                            @if($inscripcion->pagoInscripcion && $inscripcion->pagoInscripcion->estado_pago === 'pagado')
+                            @if(($inscripcion->pagoInscripcion && $inscripcion->pagoInscripcion->estado_pago === 'pagado') || ($inscripcion->codigo_pago_terceros && $inscripcion->pagoTercero && $inscripcion->pagoTercero->estado_pago === 'validado'))
                             <a href="{{ route('user.congresos.inscripciones.factura', $inscripcion) }}" 
                                class="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600/20 to-indigo-600/20 hover:from-blue-600/30 hover:to-indigo-600/30 text-blue-300 hover:text-blue-200 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300">
                                 <i class="fas fa-file-invoice text-sm"></i>
                                 <span>Descargar comprobante</span>
                             </a>
-                            @elseif(!$inscripcion->pagoInscripcion || $inscripcion->pagoInscripcion->estado_pago === 'pendiente')
+                            @elseif((!$inscripcion->pagoInscripcion || $inscripcion->pagoInscripcion->estado_pago === 'pendiente') && !($inscripcion->codigo_pago_terceros && $inscripcion->pagoTercero && $inscripcion->pagoTercero->estado_pago === 'validado'))
                             <div class="space-y-3">
                                 <div class="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                                     <p class="text-yellow-200 text-sm text-center">
@@ -376,12 +414,13 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-gray-400">Pago</span>
                                 <span class="text-sm font-medium
-                                    @switch($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente')
-                                        @case('pagado') text-green-400 @break
+                                    @switch($estadoPago)
+                                        @case('pagado')
+                                        @case('validado') text-green-400 @break
                                         @case('rechazado') text-red-400 @break
                                         @default text-yellow-400
                                     @endswitch">
-                                    {{ ucfirst($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente') }}
+                                    {{ $textoEstado }}
                                 </span>
                             </div>
                             

@@ -97,7 +97,7 @@ class InscripcionCongreso extends Model
     }
 
     // Relación con el pago de terceros usando el código
-    public function pagoTerceros()
+    public function pagoTercero()
     {
         return $this->belongsTo(PagoTerceroTransferenciaCongreso::class, 'codigo_pago_terceros', 'codigo_validacion_unico');
     }
@@ -108,17 +108,17 @@ class InscripcionCongreso extends Model
     public function tienePagoValido()
     {
         // Verificar pago PayPal
-        if ($this->pago_paypal_id && $this->pagoPaypal && $this->pagoPaypal->estaPagado()) {
+        if ($this->pago_paypal_id && $this->pagoPaypal && $this->pagoPaypal->estado_pago === 'pagado') {
             return true;
         }
 
         // Verificar pago de terceros
-        if ($this->codigo_pago_terceros && $this->pagoTerceros && $this->pagoTerceros->estaValidado()) {
+        if ($this->codigo_pago_terceros && $this->pagoTercero && $this->pagoTercero->estado_pago === 'validado') {
             return true;
         }
 
-        // Verificar método anterior (compatibilidad)
-        if ($this->estaPagada()) {
+        // Verificar pago de inscripción legacy
+        if ($this->pago_inscripcion_id && $this->pagoInscripcion && $this->pagoInscripcion->estado_pago === 'pagado') {
             return true;
         }
 
@@ -143,7 +143,7 @@ class InscripcionCongreso extends Model
     }
 
     /**
-     * Obtener información del pago
+     * Obtener información detallada del pago
      */
     public function getInfoPagoAttribute()
     {
@@ -151,17 +151,20 @@ class InscripcionCongreso extends Model
             return [
                 'tipo' => 'PayPal',
                 'monto' => $this->pagoPaypal->monto,
-                'estado' => $this->pagoPaypal->nombre_estado_pago,
-                'fecha' => $this->pagoPaypal->fecha_pago
+                'referencia' => $this->pagoPaypal->referencia_paypal,
+                'fecha' => $this->pagoPaypal->fecha_pago,
+                'estado' => $this->pagoPaypal->estado_pago
             ];
         }
 
-        if ($this->codigo_pago_terceros && $this->pagoTerceros) {
+        if ($this->codigo_pago_terceros && $this->pagoTercero) {
             return [
-                'tipo' => 'Terceros',
-                'monto' => $this->pagoTerceros->monto_total,
-                'estado' => $this->pagoTerceros->nombre_estado_pago,
-                'codigo' => $this->pagoTerceros->codigo_validacion_unico
+                'tipo' => 'Pago de Terceros',
+                'monto' => $this->pagoTercero->monto_total,
+                'referencia' => $this->pagoTercero->referencia_transferencia,
+                'fecha' => $this->pagoTercero->fecha_pago,
+                'estado' => $this->pagoTercero->estado_pago,
+                'codigo' => $this->codigo_pago_terceros
             ];
         }
 
@@ -169,8 +172,9 @@ class InscripcionCongreso extends Model
             return [
                 'tipo' => 'Inscripción Legacy',
                 'monto' => $this->pagoInscripcion->monto,
-                'estado' => $this->pagoInscripcion->estado_pago,
-                'fecha' => $this->pagoInscripcion->fecha_pago
+                'referencia' => $this->pagoInscripcion->referencia_pago,
+                'fecha' => $this->pagoInscripcion->fecha_pago,
+                'estado' => $this->pagoInscripcion->estado_pago
             ];
         }
 

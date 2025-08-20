@@ -164,7 +164,10 @@
           <div x-show="open" class="mt-2 space-y-1" x-collapse>
             <div class="pl-10 border-l-2 border-white/10">
               <a href="{{ route('admin.pagos-terceros.index') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
-                <i class="fas fa-exchange-alt mr-2"></i>Pagos Transferencias
+                <i class="fas fa-exchange-alt mr-2"></i>Pagos Transferencias Concurso
+              </a>
+              <a href="{{ route('admin.congresos.pagos-terceros.index') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
+                <i class="fas fa-exchange-alt mr-2"></i>Pagos Transferencias Congreso
               </a>
               <a href="{{ route('admin.becas') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
                 <i class="fas fa-gift mr-2"></i>Becas

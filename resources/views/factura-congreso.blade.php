@@ -167,7 +167,25 @@
                 <p><strong>Fecha del formato de pago:</strong>
                     {{ \Carbon\Carbon::parse($datos['fecha_pago'])->format('d M Y') }}</p>
             </div>
+        </div>
 
+        <!-- Información del Participante -->
+        <div style="margin: 20px 0; padding: 15px; background-color: #f8fafc; border: 1px solid #e2e8f0;">
+            <h3 style="margin: 0 0 10px 0; color: var(--primary); font-size: 1.1em;">INFORMACIÓN DEL PARTICIPANTE</h3>
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+                <div style="flex: 1; min-width: 250px;">
+                    <p style="margin: 5px 0;"><strong>Nombre completo:</strong> {{ $datos['usuario'] }}</p>
+                    <p style="margin: 5px 0;"><strong>Correo electrónico:</strong> {{ $datos['email'] }}</p>
+                    <p style="margin: 5px 0;"><strong>Tipo de participante:</strong> {{ $datos['tipo_participante'] ?? 'No especificado' }}</p>
+                </div>
+                <div style="flex: 1; min-width: 250px;">
+                    <p style="margin: 5px 0;"><strong>Institución:</strong> {{ $datos['institucion'] ?? 'No especificada' }}</p>
+                    @if(isset($datos['fecha_inscripcion']))
+                    <p style="margin: 5px 0;"><strong>Fecha de inscripcion</strong> 
+                        {{ \Carbon\Carbon::parse($datos['fecha_inscripcion'])->format('d/m/Y H:i:s') }}</p>
+                    @endif
+                </div>
+            </div>
         </div>
 
         <table>
@@ -181,8 +199,8 @@
             </thead>
             <tbody>
                 <tr>
-                    <td>{{ $datos['congreso'] }}</td>
                     <td>1</td>
+                    <td>{{ $datos['congreso'] }}</td>
                     <td>${{ number_format($datos['monto'], 2) }}</td>
                     <td>${{ number_format($datos['monto'], 2) }}</td>
                 </tr>

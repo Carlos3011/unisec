@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\Concurso\ConcursoController;
 use App\Http\Controllers\Admin\Concurso\ConvocatoriaConcursoController;
 use App\Http\Controllers\Admin\Concurso\PreRegistroConcursoController;
 use App\Http\Controllers\Admin\AdminPagoTerceroController;
+use App\Http\Controllers\AdminPagoTerceroCongresoController;
 
 use App\Http\Controllers\User\Concurso\ConcursoUserController;
 use App\Http\Controllers\User\Concurso\ConvocatoriaUserController;
@@ -180,6 +181,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/pagos-terceros', [AdminPagoTerceroController::class, 'index'])->name('admin.pagos-terceros.index');
     Route::get('/admin/pagos-terceros/{pago}', [AdminPagoTerceroController::class, 'show'])->name('admin.pagos-terceros.show');
     Route::put('/admin/pagos-terceros/{pago}/estado', [AdminPagoTerceroController::class, 'updateEstado'])->name('admin.pagos-terceros.update-estado');
+
+    // Rutas para la gestión de pagos de terceros de congresos
+    Route::get('/admin/congresos/pagos-terceros', [AdminPagoTerceroCongresoController::class, 'index'])->name('admin.congresos.pagos-terceros.index');
+    Route::get('/admin/congresos/pagos-terceros/{pago}', [AdminPagoTerceroCongresoController::class, 'show'])->name('admin.congresos.pagos-terceros.show');
+    Route::put('/admin/congresos/pagos-terceros/{pago}/estado', [AdminPagoTerceroCongresoController::class, 'updateEstado'])->name('admin.congresos.pagos-terceros.update-estado');
 
     // Rutas para la gestión de pagos de pre-registro
     Route::get('/admin/pagos', [PagoPreRegistroController::class, 'index'])->name('admin.pagos.index');

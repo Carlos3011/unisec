@@ -63,6 +63,12 @@
                 </div>
                 @else
                 <!-- Vista de tabla para pantallas medianas y grandes -->
+                @php
+                    $tieneArticulos = $inscripciones->contains(function($inscripcion) {
+                        return $inscripcion->articulo !== null;
+                    });
+                @endphp
+                
                 <div class="hidden md:block overflow-x-auto rounded-lg border border-white/10">
                     <table class="min-w-full divide-y divide-white/10">
                         <thead class="bg-white/5">
@@ -76,9 +82,11 @@
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">
                                     Institución
                                 </th>
+                                @if($tieneArticulos)
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">
                                     Artículo
                                 </th>
+                                @endif
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">
                                     Estado
                                 </th>
@@ -116,21 +124,27 @@
                                     <div class="text-sm text-white/90">{{ Str::limit($inscripcion->institucion, 20) }}</div>
                                 </td>
                                 
-                                <!-- Estado del artículo -->
+                                <!-- Estado del artículo (solo si hay artículos en la lista) -->
+                                @if($tieneArticulos)
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($inscripcion->articulo)
-                                    <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
-                                        @if($inscripcion->articulo->estado_articulo === 'aceptado') bg-green-500/20 text-green-300 border border-green-500/30
-                                        @elseif($inscripcion->articulo->estado_articulo === 'rechazado') bg-red-500/20 text-red-300 border border-red-500/30
-                                        @else bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
-                                        @endif">
-                                        <span class="w-1.5 h-1.5 rounded-full
-                                            @if($inscripcion->articulo->estado_articulo === 'aceptado') bg-green-400
-                                            @elseif($inscripcion->articulo->estado_articulo === 'rechazado') bg-red-400
-                                            @else bg-yellow-400
-                                            @endif"></span>
-                                        {{ ucfirst(str_replace('_', ' ', $inscripcion->articulo->estado_articulo)) }}
-                                    </span>
+                                    <div class="flex flex-col space-y-1">
+                                        <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
+                                            @if($inscripcion->articulo->estado_articulo === 'aceptado') bg-green-500/20 text-green-300 border border-green-500/30
+                                            @elseif($inscripcion->articulo->estado_articulo === 'rechazado') bg-red-500/20 text-red-300 border border-red-500/30
+                                            @else bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
+                                            @endif">
+                                            <span class="w-1.5 h-1.5 rounded-full
+                                                @if($inscripcion->articulo->estado_articulo === 'aceptado') bg-green-400
+                                                @elseif($inscripcion->articulo->estado_articulo === 'rechazado') bg-red-400
+                                                @else bg-yellow-400
+                                                @endif"></span>
+                                            {{ ucfirst(str_replace('_', ' ', $inscripcion->articulo->estado_articulo)) }}
+                                        </span>
+                                        <div class="text-xs text-gray-400 truncate" title="{{ $inscripcion->articulo->titulo }}">
+                                            <i class="fas fa-file-alt mr-1"></i>{{ Str::limit($inscripcion->articulo->titulo, 25) }}
+                                        </div>
+                                    </div>
                                     @else
                                     <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full bg-gray-500/20 text-gray-300 border border-gray-500/30">
                                         <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
@@ -138,42 +152,59 @@
                                     </span>
                                     @endif
                                 </td>
+                                @endif
                                 
                                 <!-- Estado de inscripción -->
                                 <td class="px-6 py-4 whitespace-nowrap">
+                                    @php
+                                        // Si el usuario ya pagó pero no envió artículo, consideramos la inscripción como validada
+                                        $estadoMostrar = $inscripcion->estado;
+                                        if ($inscripcion->tienePagoValido() && !$inscripcion->articulo && $inscripcion->estado === 'pendiente') {
+                                            $estadoMostrar = 'validado';
+                                        }
+                                    @endphp
                                     <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
-                                        @if($inscripcion->estado === 'validado') bg-green-500/20 text-green-300 border border-green-500/30
-                                        @elseif($inscripcion->estado === 'rechazado') bg-red-500/20 text-red-300 border border-red-500/30
+                                        @if($estadoMostrar === 'validado') bg-green-500/20 text-green-300 border border-green-500/30
+                                        @elseif($estadoMostrar === 'rechazado') bg-red-500/20 text-red-300 border border-red-500/30
                                         @else bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
                                         @endif">
                                         <span class="w-1.5 h-1.5 rounded-full
-                                            @if($inscripcion->estado === 'validado') bg-green-400
-                                            @elseif($inscripcion->estado === 'rechazado') bg-red-400
+                                            @if($estadoMostrar === 'validado') bg-green-400
+                                            @elseif($estadoMostrar === 'rechazado') bg-red-400
                                             @else bg-yellow-400
                                             @endif"></span>
-                                        {{ ucfirst($inscripcion->estado) }}
+                                        {{ ucfirst($estadoMostrar) }}
                                     </span>
                                 </td>
                                 
                                 <!-- Estado de pago -->
                                 <td class="px-6 py-4 whitespace-nowrap">
+                                    @php
+                                        $tienePagoValido = $inscripcion->tienePagoValido();
+                                        $tipoPago = $inscripcion->tipo_pago;
+                                        $estadoPago = $tienePagoValido ? 'pagado' : ($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente');
+                                    @endphp
+                                    
                                     <div class="flex flex-col space-y-2">
-                                        <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
-                                            @switch($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente')
-                                                @case('pagado') bg-green-500/20 text-green-300 border border-green-500/30 @break
-                                                @case('rechazado') bg-red-500/20 text-red-300 border border-red-500/30 @break
-                                                @default bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
-                                            @endswitch">
-                                            <span class="w-1.5 h-1.5 rounded-full
-                                                @switch($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente')
-                                                    @case('pagado') bg-green-400 @break
-                                                    @case('rechazado') bg-red-400 @break
-                                                    @default bg-yellow-400
-                                                @endswitch"></span>
-                                            {{ ucfirst($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente') }}
-                                        </span>
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
+                                                @if($tienePagoValido) bg-green-500/20 text-green-300 border border-green-500/30
+                                                @elseif($estadoPago === 'rechazado') bg-red-500/20 text-red-300 border border-red-500/30
+                                                @else bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
+                                                @endif">
+                                                <span class="w-1.5 h-1.5 rounded-full
+                                                    @if($tienePagoValido) bg-green-400
+                                                    @elseif($estadoPago === 'rechazado') bg-red-400
+                                                    @else bg-yellow-400
+                                                    @endif"></span>
+                                                {{ $tienePagoValido ? 'Pagado' : ucfirst($estadoPago) }}
+                                            </span>
+                                            
+                                        </div>
                                         
-                                        @if(!$inscripcion->pagoInscripcion || $inscripcion->pagoInscripcion->estado_pago === 'pendiente')
+                                    
+                                        
+                                        @if(!$tienePagoValido)
                                         <div class="flex space-x-1">
                                             <a href="{{ route('user.congresos.pagos.inscripcion', $inscripcion->convocatoria) }}" 
                                                class="text-xs px-2 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:text-blue-200 border border-blue-500/20 transition-all"
@@ -191,32 +222,32 @@
                                 </td>
                                 
                                 <!-- Acciones -->
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex justify-end space-x-3">
+                                <td class="px-3 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-1">
                                         <a href="{{ route('user.congresos.inscripciones.show', $inscripcion) }}"
-                                           class="text-blue-400 hover:text-blue-300 transition-colors inline-flex items-center gap-1.5 group"
+                                           class="text-blue-400 hover:text-blue-300 transition-colors inline-flex items-center group"
                                            title="Ver detalles">
-                                            <span class="w-8 h-8 flex items-center justify-center rounded-full bg-blue-500/10 group-hover:bg-blue-500/20 border border-blue-500/20 group-hover:border-blue-500/30 transition-all">
-                                                <i class="fas fa-eye text-sm"></i>
+                                            <span class="w-7 h-7 flex items-center justify-center rounded-full bg-blue-500/10 group-hover:bg-blue-500/20 border border-blue-500/20 group-hover:border-blue-500/30 transition-all">
+                                                <i class="fas fa-eye text-xs"></i>
                                             </span>
                                         </a>
                                         
                                         @if($inscripcion->estado === 'pendiente')
                                         <a href="{{ route('user.congresos.inscripciones.edit', $inscripcion) }}"
-                                           class="text-yellow-400 hover:text-yellow-300 transition-colors inline-flex items-center gap-1.5 group"
+                                           class="text-yellow-400 hover:text-yellow-300 transition-colors inline-flex items-center group"
                                            title="Editar">
-                                            <span class="w-8 h-8 flex items-center justify-center rounded-full bg-yellow-500/10 group-hover:bg-yellow-500/20 border border-yellow-500/20 group-hover:border-yellow-500/30 transition-all">
-                                                <i class="fas fa-edit text-sm"></i>
+                                            <span class="w-7 h-7 flex items-center justify-center rounded-full bg-yellow-500/10 group-hover:bg-yellow-500/20 border border-yellow-500/20 group-hover:border-yellow-500/30 transition-all">
+                                                <i class="fas fa-edit text-xs"></i>
                                             </span>
                                         </a>
                                         @endif
                                         
                                         @if($inscripcion->pagoInscripcion)
                                         <a href="{{ route('user.congresos.inscripciones.factura', $inscripcion) }}"
-                                           class="text-green-400 hover:text-green-300 transition-colors inline-flex items-center gap-1.5 group"
+                                           class="text-green-400 hover:text-green-300 transition-colors inline-flex items-center group"
                                            title="Descargar ticket">
-                                            <span class="w-8 h-8 flex items-center justify-center rounded-full bg-green-500/10 group-hover:bg-green-500/20 border border-green-500/20 group-hover:border-green-500/30 transition-all">
-                                                <i class="fas fa-file-invoice text-sm"></i>
+                                            <span class="w-7 h-7 flex items-center justify-center rounded-full bg-green-500/10 group-hover:bg-green-500/20 border border-green-500/20 group-hover:border-green-500/30 transition-all">
+                                                <i class="fas fa-file-invoice text-xs"></i>
                                             </span>
                                         </a>
                                         @endif
@@ -242,17 +273,24 @@
                                     <p class="text-xs text-gray-400 mt-1">{{ $inscripcion->created_at->format('d/m/Y') }}</p>
                                 </div>
                             </div>
+                            @php
+                                // Si el usuario ya pagó pero no envió artículo, consideramos la inscripción como validada
+                                $estadoMostrarMobile = $inscripcion->estado;
+                                if ($inscripcion->tienePagoValido() && !$inscripcion->articulo && $inscripcion->estado === 'pendiente') {
+                                    $estadoMostrarMobile = 'validado';
+                                }
+                            @endphp
                             <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
-                                @if($inscripcion->estado === 'validado') bg-green-500/20 text-green-300 border border-green-500/30
-                                @elseif($inscripcion->estado === 'rechazado') bg-red-500/20 text-red-300 border border-red-500/30
+                                @if($estadoMostrarMobile === 'validado') bg-green-500/20 text-green-300 border border-green-500/30
+                                @elseif($estadoMostrarMobile === 'rechazado') bg-red-500/20 text-red-300 border border-red-500/30
                                 @else bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
                                 @endif">
                                 <span class="w-1.5 h-1.5 rounded-full
-                                    @if($inscripcion->estado === 'validado') bg-green-400
-                                    @elseif($inscripcion->estado === 'rechazado') bg-red-400
+                                    @if($estadoMostrarMobile === 'validado') bg-green-400
+                                    @elseif($estadoMostrarMobile === 'rechazado') bg-red-400
                                     @else bg-yellow-400
                                     @endif"></span>
-                                {{ ucfirst($inscripcion->estado) }}
+                                {{ ucfirst($estadoMostrarMobile) }}
                             </span>
                         </div>
 
@@ -267,10 +305,10 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
-                                <p class="text-gray-400 mb-1">Artículo</p>
-                                @if($inscripcion->articulo)
+                        @if($inscripcion->articulo)
+                        <div class="bg-black/20 p-3 rounded-lg border border-white/5 col-span-2">
+                            <p class="text-gray-400 mb-2">Artículo</p>
+                            <div class="space-y-2">
                                 <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
                                     @if($inscripcion->articulo->estado_articulo === 'aceptado') bg-green-500/20 text-green-300 border border-green-500/30
                                     @elseif($inscripcion->articulo->estado_articulo === 'rechazado') bg-red-500/20 text-red-300 border border-red-500/30
@@ -283,42 +321,80 @@
                                         @endif"></span>
                                     {{ ucfirst(str_replace('_', ' ', $inscripcion->articulo->estado_articulo)) }}
                                 </span>
-                                @else
-                                <span class="text-gray-400 text-sm">No registrado</span>
-                                @endif
-                            </div>
-                            
-                            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
-                                <p class="text-gray-400 mb-1">Pago</p>
-                                <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
-                                    @switch($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente')
-                                        @case('pagado') bg-green-500/20 text-green-300 border border-green-500/30 @break
-                                        @case('rechazado') bg-red-500/20 text-red-300 border border-red-500/30 @break
-                                        @default bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
-                                    @endswitch">
-                                    <span class="w-1.5 h-1.5 rounded-full
-                                        @switch($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente')
-                                            @case('pagado') bg-green-400 @break
-                                            @case('rechazado') bg-red-400 @break
-                                            @default bg-yellow-400
-                                        @endswitch"></span>
-                                    {{ ucfirst($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente') }}
-                                </span>
-                                
-                                @if(!$inscripcion->pagoInscripcion || $inscripcion->pagoInscripcion->estado_pago === 'pendiente')
-                                <div class="flex space-x-1 mt-2">
-                                    <a href="{{ route('user.congresos.pagos.inscripcion', $inscripcion->convocatoria) }}" 
-                                       class="text-xs px-2 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:text-blue-200 border border-blue-500/20 transition-all"
-                                       title="Pagar con PayPal">
-                                        <i class="fab fa-paypal"></i>
-                                    </a>
-                                    <a href="{{ route('user.congresos.pagos-terceros.validar') }}" 
-                                       class="text-xs px-2 py-1 rounded bg-green-500/10 hover:bg-green-500/20 text-green-300 hover:text-green-200 border border-green-500/20 transition-all"
-                                       title="Validar código de terceros">
-                                        <i class="fas fa-users"></i>
-                                    </a>
+                                <div class="text-sm text-white/90 font-medium" title="{{ $inscripcion->articulo->titulo }}">
+                                    <i class="fas fa-file-alt mr-2 text-blue-400"></i>{{ Str::limit($inscripcion->articulo->titulo, 40) }}
+                                </div>
+                                @if($inscripcion->articulo->autores)
+                                <div class="text-xs text-gray-400">
+                                    <i class="fas fa-users mr-1"></i>{{ Str::limit($inscripcion->articulo->autores, 35) }}
                                 </div>
                                 @endif
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="grid grid-cols-1 gap-3">
+                            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                                @php
+                                    $tienePagoValido = $inscripcion->tienePagoValido();
+                                    $tipoPago = $inscripcion->tipo_pago;
+                                    $estadoPago = $tienePagoValido ? 'pagado' : ($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente');
+                                @endphp
+                                
+                                <p class="text-gray-400 mb-2">Pago</p>
+                                
+                                <div class="flex flex-col space-y-2">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
+                                            @if($tienePagoValido) bg-green-500/20 text-green-300 border border-green-500/30
+                                            @elseif($estadoPago === 'rechazado') bg-red-500/20 text-red-300 border border-red-500/30
+                                            @else bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
+                                            @endif">
+                                            <span class="w-1.5 h-1.5 rounded-full
+                                                @if($tienePagoValido) bg-green-400
+                                                @elseif($estadoPago === 'rechazado') bg-red-400
+                                                @else bg-yellow-400
+                                                @endif"></span>
+                                            {{ $tienePagoValido ? 'Pagado' : ucfirst($estadoPago) }}
+                                        </span>
+                                        
+                                        @if($tienePagoValido)
+                                            <span class="px-2 py-1 text-xs rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20"
+                                                  title="Tipo de pago utilizado">
+                                                @switch($tipoPago)
+                                                    @case('paypal')
+                                                        <i class="fab fa-paypal mr-1"></i>PayPal
+                                                        @break
+                                                    @case('terceros')
+                                                        <i class="fas fa-users mr-1"></i>Terceros
+                                                        @break
+                                                    @case('inscripcion_legacy')
+                                                        <i class="fas fa-credit-card mr-1"></i>Legacy
+                                                        @break
+                                                    @default
+                                                        <i class="fas fa-question mr-1"></i>Otro
+                                                @endswitch
+                                            </span>
+                                        @endif
+                                    </div>
+                                    
+                                    
+                                    
+                                    @if(!$tienePagoValido)
+                                    <div class="flex space-x-1 mt-2">
+                                        <a href="{{ route('user.congresos.pagos.inscripcion', $inscripcion->convocatoria) }}" 
+                                           class="text-xs px-2 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:text-blue-200 border border-blue-500/20 transition-all"
+                                           title="Pagar con PayPal">
+                                            <i class="fab fa-paypal"></i>
+                                        </a>
+                                        <a href="{{ route('user.congresos.pagos-terceros.validar') }}" 
+                                           class="text-xs px-2 py-1 rounded bg-green-500/10 hover:bg-green-500/20 text-green-300 hover:text-green-200 border border-green-500/20 transition-all"
+                                           title="Validar código de terceros">
+                                            <i class="fas fa-users"></i>
+                                        </a>
+                                    </div>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 

@@ -203,13 +203,14 @@ class PagoTerceroCongresoController extends Controller
             return response()->json(['error' => 'El código ha alcanzado el límite de usos permitidos para todos los tipos'], 400);
         }
 
-        // Obtener el evento correspondiente al congreso
-        $evento = EventoCongreso::where('congreso_id', $pagoTercero->congreso_id)->first();
+        // Obtener la convocatoria correspondiente al congreso
+        $congreso = Congreso::with('convocatorias')->find($pagoTercero->congreso_id);
+        $convocatoria = $congreso ? $congreso->convocatorias->first() : null;
 
         return response()->json([
             'valid' => true,
             'congreso_id' => $pagoTercero->congreso_id,
-            'evento_id' => $evento ? $evento->id : null,
+            'convocatoria_id' => $convocatoria ? $convocatoria->id : null,
             'usosDisponiblesIns' => $usosDisponiblesIns,
             'usosDisponiblesArt' => $usosDisponiblesArt,
             'message' => 'Validación exitosa. ' .

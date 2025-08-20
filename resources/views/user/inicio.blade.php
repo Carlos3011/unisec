@@ -319,19 +319,28 @@
                                         <i class="fas fa-info-circle mr-2"></i>Ver detalles
                                     </a>
                                     @php
-                                        $pagoConfirmado = \App\Models\PagoInscripcionCongreso::where('usuario_id', Auth::id())
-                                            ->where('congreso_id', $congreso->id)
-                                            ->where('estado_pago', 'pagado')
-                                            ->exists();
-                                            
+                                        // Verificar si existe una inscripción para este usuario y congreso
                                         $inscripcion = \App\Models\InscripcionCongreso::where('usuario_id', Auth::id())
                                             ->where('congreso_id', $congreso->id)
                                             ->first();
                                             
+                                        // Verificar si tiene pago confirmado por PayPal
+                                        $pagoPaypalConfirmado = \App\Models\PagoInscripcionCongreso::where('usuario_id', Auth::id())
+                                            ->where('congreso_id', $congreso->id)
+                                            ->where('estado_pago', 'pagado')
+                                            ->exists();
+                                            
+                                        // Verificar si tiene pago validado por terceros
+                                        $pagoTercerosValidado = \App\Models\PagoTerceroTransferenciaCongreso::where('usuario_id', Auth::id())
+                                            ->where('congreso_id', $congreso->id)
+                                            ->where('estado_pago', 'validado')
+                                            ->exists();
+                                            
+                                        $tienePagoValido = $pagoPaypalConfirmado || $pagoTercerosValidado;
                                         $tieneInscripcion = $inscripcion ? true : false;
                                     @endphp
 
-                                    @if($pagoConfirmado)
+                                    @if($tieneInscripcion || $tienePagoValido)
                                         @if($tieneInscripcion)
                                             <a href="{{ route('user.congresos.inscripciones.show', $inscripcion->id) }}"
                                             class="inline-flex items-center justify-center px-4 py-2 bg-green-500/20 text-green-400 rounded-xl hover:bg-green-500/30 transition-all duration-500">

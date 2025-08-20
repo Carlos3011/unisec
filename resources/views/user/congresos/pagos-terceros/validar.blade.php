@@ -186,8 +186,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     confirmButtonText: 'Sí, continuar',
                     cancelButtonText: 'No, cancelar'
                 }).then((swalResult) => {
-                    if (swalResult.isConfirmed && result.evento_id) {
-                        window.location.href = '{{ route("user.congresos.inscripciones.create", "") }}/' + result.evento_id;
+                    if (swalResult.isConfirmed && result.convocatoria_id) {
+                        window.location.href = '{{ route("user.congresos.inscripciones.create", "") }}/' + result.convocatoria_id;
                     }
                 });
             } else {
