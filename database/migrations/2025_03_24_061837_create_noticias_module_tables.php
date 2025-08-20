@@ -11,9 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {   
-        \DB::statement('SET FOREIGN_KEY_CHECKS = 0;');
-        
+        // Crear primero la tabla padre
+        Schema::create('seccion_noticias', function (Blueprint $table) {
+            $table->id();
+            $table->string('titulo');
+            $table->timestamps();
+            $table->softDeletes();
+        });
 
+        // Luego crear la tabla que tiene la clave foránea
         Schema::create('noticias', function (Blueprint $table) {
             $table->id();
             $table->foreignId('seccion_noticias_id')->constrained('seccion_noticias')->onDelete('cascade');
@@ -28,15 +34,6 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
-
-        Schema::create('seccion_noticias', function (Blueprint $table) {
-            $table->id();
-            $table->string('titulo');
-            $table->timestamps();
-            $table->softDeletes();
-        });
-
-        \DB::statement('SET FOREIGN_KEY_CHECKS = 1;');
     }
 
     /**

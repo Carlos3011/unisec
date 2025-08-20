@@ -15,7 +15,6 @@ class Concurso extends Model
     protected $fillable = [
         'titulo',
         'categoria_id',
-    
         'estado'
     ];
 

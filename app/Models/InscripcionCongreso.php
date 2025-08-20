@@ -17,10 +17,12 @@ class InscripcionCongreso extends Model
         'congreso_id',
         'articulo_id',
         'convocatoria_congreso_id',
+        'pago_paypal_id',
         'tipo_participante',
         'institucion',
         'comprobante_estudiante',
-        'pago_inscripcion_id'
+        'pago_inscripcion_id',
+        'codigo_pago_terceros'
     ];
 
     protected $casts = [
@@ -86,5 +88,92 @@ class InscripcionCongreso extends Model
         return $this->pagosCongreso()
             ->latest('fecha_pago')
             ->first();
+    }
+
+    // Relación con el pago PayPal de la inscripción
+    public function pagoPaypal()
+    {
+        return $this->belongsTo(PagoPaypalCongreso::class, 'pago_paypal_id');
+    }
+
+    // Relación con el pago de terceros usando el código
+    public function pagoTerceros()
+    {
+        return $this->belongsTo(PagoTerceroTransferenciaCongreso::class, 'codigo_pago_terceros', 'codigo_validacion_unico');
+    }
+
+    /**
+     * Verificar si la inscripción tiene un pago válido (nuevo método)
+     */
+    public function tienePagoValido()
+    {
+        // Verificar pago PayPal
+        if ($this->pago_paypal_id && $this->pagoPaypal && $this->pagoPaypal->estaPagado()) {
+            return true;
+        }
+
+        // Verificar pago de terceros
+        if ($this->codigo_pago_terceros && $this->pagoTerceros && $this->pagoTerceros->estaValidado()) {
+            return true;
+        }
+
+        // Verificar método anterior (compatibilidad)
+        if ($this->estaPagada()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Obtener el tipo de pago utilizado
+     */
+    public function getTipoPagoAttribute()
+    {
+        if ($this->pago_paypal_id) {
+            return 'paypal';
+        }
+        if ($this->codigo_pago_terceros) {
+            return 'terceros';
+        }
+        if ($this->pago_inscripcion_id) {
+            return 'inscripcion_legacy';
+        }
+        return 'sin_pago';
+    }
+
+    /**
+     * Obtener información del pago
+     */
+    public function getInfoPagoAttribute()
+    {
+        if ($this->pago_paypal_id && $this->pagoPaypal) {
+            return [
+                'tipo' => 'PayPal',
+                'monto' => $this->pagoPaypal->monto,
+                'estado' => $this->pagoPaypal->nombre_estado_pago,
+                'fecha' => $this->pagoPaypal->fecha_pago
+            ];
+        }
+
+        if ($this->codigo_pago_terceros && $this->pagoTerceros) {
+            return [
+                'tipo' => 'Terceros',
+                'monto' => $this->pagoTerceros->monto_total,
+                'estado' => $this->pagoTerceros->nombre_estado_pago,
+                'codigo' => $this->pagoTerceros->codigo_validacion_unico
+            ];
+        }
+
+        if ($this->pago_inscripcion_id && $this->pagoInscripcion) {
+            return [
+                'tipo' => 'Inscripción Legacy',
+                'monto' => $this->pagoInscripcion->monto,
+                'estado' => $this->pagoInscripcion->estado_pago,
+                'fecha' => $this->pagoInscripcion->fecha_pago
+            ];
+        }
+
+        return null;
     }
 }

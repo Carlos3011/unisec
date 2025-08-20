@@ -46,7 +46,51 @@ return new class extends Migration {
             $table->softDeletes();
         });
 
-        // Tabla para pagos de inscripción al congreso
+        // 1. Creación de la tabla unificada 'pagos_paypal_congresos' para registrar pagos de PayPal tanto de artículos como inscripción
+        Schema::create('pagos_paypal_congresos', function (Blueprint $table) {
+            $table->id();  // Clave primaria.
+            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');  // Relación con el usuario que realiza el pago
+            $table->foreignId('congreso_id')->constrained('congresos')->onDelete('cascade');  // Relación con el congreso
+            
+            // Campo para identificar el tipo de pago
+            $table->enum('tipo_pago', ['articulo', 'inscripcion']);  // Tipo de pago
+            
+            // Campos específicos de PayPal
+            $table->decimal('monto', 10, 2);  // Monto del pago.
+            $table->string('metodo_pago')->default('paypal');  // Método de pago, siempre PayPal
+            $table->string('referencia_paypal')->nullable();  // Referencia de transacción en PayPal
+            $table->string('paypal_order_id')->nullable();  // ID único de la orden en PayPal
+            $table->enum('estado_pago', ['pendiente', 'pagado', 'rechazado'])->default('pendiente');  // Estado del pago.
+            $table->timestamp('fecha_pago')->nullable();  // Fecha en que se realizó el pago
+            $table->text('detalles_transaccion')->nullable();  // Detalles adicionales de la transacción en formato JSON
+            $table->string('comprobante_pago')->nullable();  // Archivo o evidencia del pago
+            $table->timestamps();  // Registra las fechas de creación y actualización.
+            $table->softDeletes();  // Permite el borrado suave de los pagos.
+        });
+        
+        Schema::create('pagos_terceros_transferencia_congreso', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');  // Relación con la tabla 'users'
+            $table->foreignId('congreso_id')->constrained('congresos')->onDelete('cascade');  // Relación con la tabla 'congresos'
+            $table->enum('tipo_tercero', ['universidad', 'empresa', 'persona_fisica'])->default('persona_fisica');
+            $table->string('nombre_tercero');
+            $table->string('rfc_tercero')->nullable();
+            $table->string('contacto_tercero');
+            $table->string('correo_tercero');
+            $table->string('comprobante_pago')->nullable();
+            $table->decimal('monto_total', 10, 2);
+            $table->enum('estado_pago', ['pendiente', 'validado', 'rechazado'])->default('pendiente');
+            $table->string('referencia_transferencia')->nullable();
+            $table->integer('numero_pagos')->unsigned()->default(1);
+            $table->boolean('cubre_articulo')->default(false);
+            $table->boolean('cubre_inscripcion')->default(false);
+            $table->string('codigo_validacion_unico', 100);
+            $table->timestamp('fecha_pago')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        // Tabla para pagos de inscripción al congreso (mantener compatibilidad)
         Schema::create('pagos_inscripcion_congreso', function (Blueprint $table) {
             $table->id();
             $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
@@ -61,6 +105,27 @@ return new class extends Migration {
             $table->text('detalles_transaccion')->nullable();
             $table->string('comprobante_pago')->nullable();
             $table->timestamps();
+        });
+
+        // Tabla para eventos del congreso
+        Schema::create('eventos_congreso', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('congreso_id')->constrained('congresos')->onDelete('cascade');
+            $table->string('tipo');
+            $table->string('titulo');
+            $table->date('fecha');
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        // Tabla para asistencias a eventos
+        Schema::create('asistencias_eventos', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('evento_id')->constrained('eventos_congreso')->onDelete('cascade');
+            $table->enum('estado_asistencia', ['confirmado', 'pendiente', 'cancelado'])->default('pendiente');
+            $table->timestamps();
+            $table->softDeletes();
         });
 
         // Tabla para fechas importantes del congreso
@@ -80,6 +145,7 @@ return new class extends Migration {
             $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('congreso_id')->constrained('congresos')->onDelete('cascade');
             $table->foreignId('convocatoria_congreso_id')->constrained('convocatorias_congreso')->onDelete('cascade');
+            $table->foreignId('pago_paypal_id')->nullable()->constrained('pagos_paypal_congresos')->onDelete('cascade');  // Relación con el pago PayPal
             $table->string('titulo');
             $table->json('autores_data'); // Almacena información de los autores;
             $table->string('archivo_articulo')->nullable(); // Archivo del artículo
@@ -88,6 +154,7 @@ return new class extends Migration {
             $table->enum('estado_extenso', ['pendiente', 'en_revision', 'aceptado', 'rechazado'])->default('pendiente');
             $table->text('comentarios_articulo')->nullable();
             $table->text('comentarios_extenso')->nullable();
+            $table->string('codigo_pago_terceros')->nullable()->comment('FK lógico a pagos_terceros_transferencia_congreso');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -99,10 +166,12 @@ return new class extends Migration {
             $table->foreignId('congreso_id')->constrained('congresos')->onDelete('cascade');
             $table->foreignId('articulo_id')->nullable()->constrained('articulos_congreso')->onDelete('cascade');
             $table->foreignId('convocatoria_congreso_id')->constrained('convocatorias_congreso')->onDelete('cascade');
+            $table->foreignId('pago_paypal_id')->nullable()->constrained('pagos_paypal_congresos')->onDelete('cascade');  // Relación con el pago PayPal
             $table->enum('tipo_participante', ['estudiante', 'docente', 'investigador', 'profesional'])->default('estudiante');
             $table->string('institucion');
             $table->string('comprobante_estudiante')->nullable(); // Para estudiantes que requieran validar su estatus
-            $table->foreignId('pago_inscripcion_id')->constrained('pagos_inscripcion_congreso')->onDelete('cascade');  // Relación con el pago previo
+            $table->enum('estado_inscripcion', ['pendiente', 'validado', 'rechazado'])->default('pendiente');
+            $table->string('codigo_pago_terceros')->nullable()->comment('FK lógico a pagos_terceros_transferencia_congreso');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -110,10 +179,14 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('pagos_inscripcion_congreso');
         Schema::dropIfExists('inscripciones_congreso');
         Schema::dropIfExists('articulos_congreso');
         Schema::dropIfExists('fechas_importantes_congreso');
+        Schema::dropIfExists('asistencias_eventos');
+        Schema::dropIfExists('eventos_congreso');
+        Schema::dropIfExists('pagos_inscripcion_congreso');
+        Schema::dropIfExists('pagos_terceros_transferencia_congreso');
+        Schema::dropIfExists('pagos_paypal_congresos');
         Schema::dropIfExists('convocatorias_congreso');
         Schema::dropIfExists('congresos');
     }

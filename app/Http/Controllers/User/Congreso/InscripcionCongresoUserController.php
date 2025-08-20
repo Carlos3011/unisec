@@ -37,7 +37,7 @@ class InscripcionCongresoUserController extends Controller
 
     public function create($convocatoria)
     {
-        $convocatoria = ConvocatoriaCongreso::findOrFail($convocatoria);
+        $convocatoria = ConvocatoriaCongreso::with('congreso')->findOrFail($convocatoria);
         $congreso = $convocatoria->congreso;
         $congresos = collect([$congreso]);
         
@@ -350,4 +350,4 @@ class InscripcionCongresoUserController extends Controller
 
         return response()->download(public_path($articulo->archivo_extenso));
     }
-} 
+}
