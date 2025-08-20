@@ -48,9 +48,9 @@
                         @if($pago->fecha_validacion)
                             <p><span class="font-medium">Fecha de validación:</span> {{ $pago->fecha_validacion->format('d/m/Y H:i') }}</p>
                         @endif
-                        @if($pago->codigo_unico)
-                            <p><span class="font-medium">Código único:</span> 
-                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded font-mono text-sm">{{ $pago->codigo_unico }}</span>
+                        @if($pago->codigo_validacion_unico)
+                            <p><span class="font-medium">Código de validación:</span> 
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded font-mono text-sm">{{ $pago->codigo_validacion_unico }}</span>
                             </p>
                         @endif
                         @if($pago->observacion)
@@ -79,8 +79,8 @@
                             </span>
                         </p>
                         <p><span class="font-medium">Cubre artículos:</span>
-                            <span class="{{ $pago->cubre_articulos ? 'text-green-600' : 'text-red-600' }}">
-                                {{ $pago->cubre_articulos ? 'Sí' : 'No' }}
+                            <span class="{{ $pago->cubre_articulo ? 'text-green-600' : 'text-red-600' }}">
+                                {{ $pago->cubre_articulo ? 'Sí' : 'No' }}
                             </span>
                         </p>
                         <p><span class="font-medium text-gray-400">Número de pagos:</span> {{ $pago->numero_pagos }}</p>

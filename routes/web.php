@@ -184,6 +184,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // Rutas para la gestión de pagos de terceros de congresos
     Route::get('/admin/congresos/pagos-terceros', [AdminPagoTerceroCongresoController::class, 'index'])->name('admin.congresos.pagos-terceros.index');
+    Route::get('/admin/congresos/pagos-terceros/create', [AdminPagoTerceroCongresoController::class, 'create'])->name('admin.congresos.pagos-terceros.create');
+    Route::post('/admin/congresos/pagos-terceros', [AdminPagoTerceroCongresoController::class, 'store'])->name('admin.congresos.pagos-terceros.store');
     Route::get('/admin/congresos/pagos-terceros/{pago}', [AdminPagoTerceroCongresoController::class, 'show'])->name('admin.congresos.pagos-terceros.show');
     Route::put('/admin/congresos/pagos-terceros/{pago}/estado', [AdminPagoTerceroCongresoController::class, 'updateEstado'])->name('admin.congresos.pagos-terceros.update-estado');
 

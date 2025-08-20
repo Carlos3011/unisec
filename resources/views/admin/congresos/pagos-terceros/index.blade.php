@@ -5,6 +5,10 @@
     <div class="bg-gradient-to-br from-gray-900 to-black rounded-xl shadow-xl p-8 mb-8">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent">Gestión de Pagos por Terceros - Congresos</h1>
+            <a href="{{ route('admin.congresos.pagos-terceros.create') }}" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
+                <i class="fas fa-plus"></i>
+                <span>Generar Código</span>
+            </a>
         </div>
 
     <!-- Filtros -->
