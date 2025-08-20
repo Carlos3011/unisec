@@ -82,6 +82,9 @@
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">
                                     Estado
                                 </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-purple-300 uppercase tracking-wider">
+                                    Pago
+                                </th>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-purple-300 uppercase tracking-wider">
                                     Acciones
                                 </th>
@@ -150,6 +153,41 @@
                                             @endif"></span>
                                         {{ ucfirst($inscripcion->estado) }}
                                     </span>
+                                </td>
+                                
+                                <!-- Estado de pago -->
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex flex-col space-y-2">
+                                        <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
+                                            @switch($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente')
+                                                @case('pagado') bg-green-500/20 text-green-300 border border-green-500/30 @break
+                                                @case('rechazado') bg-red-500/20 text-red-300 border border-red-500/30 @break
+                                                @default bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
+                                            @endswitch">
+                                            <span class="w-1.5 h-1.5 rounded-full
+                                                @switch($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente')
+                                                    @case('pagado') bg-green-400 @break
+                                                    @case('rechazado') bg-red-400 @break
+                                                    @default bg-yellow-400
+                                                @endswitch"></span>
+                                            {{ ucfirst($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente') }}
+                                        </span>
+                                        
+                                        @if(!$inscripcion->pagoInscripcion || $inscripcion->pagoInscripcion->estado_pago === 'pendiente')
+                                        <div class="flex space-x-1">
+                                            <a href="{{ route('user.congresos.pagos.inscripcion', $inscripcion->convocatoria) }}" 
+                                               class="text-xs px-2 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:text-blue-200 border border-blue-500/20 transition-all"
+                                               title="Pagar con PayPal">
+                                                <i class="fab fa-paypal"></i>
+                                            </a>
+                                            <a href="{{ route('user.congresos.pagos-terceros.validar') }}" 
+                                               class="text-xs px-2 py-1 rounded bg-green-500/10 hover:bg-green-500/20 text-green-300 hover:text-green-200 border border-green-500/20 transition-all"
+                                               title="Validar código de terceros">
+                                                <i class="fas fa-users"></i>
+                                            </a>
+                                        </div>
+                                        @endif
+                                    </div>
                                 </td>
                                 
                                 <!-- Acciones -->
@@ -229,24 +267,59 @@
                             </div>
                         </div>
 
-                        <div class="bg-black/20 p-3 rounded-lg border border-white/5">
-                            <p class="text-gray-400 mb-1">Artículo</p>
-                            @if($inscripcion->articulo)
-                            <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
-                                @if($inscripcion->articulo->estado_articulo === 'aceptado') bg-green-500/20 text-green-300 border border-green-500/30
-                                @elseif($inscripcion->articulo->estado_articulo === 'rechazado') bg-red-500/20 text-red-300 border border-red-500/30
-                                @else bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
-                                @endif">
-                                <span class="w-1.5 h-1.5 rounded-full
-                                    @if($inscripcion->articulo->estado_articulo === 'aceptado') bg-green-400
-                                    @elseif($inscripcion->articulo->estado_articulo === 'rechazado') bg-red-400
-                                    @else bg-yellow-400
-                                    @endif"></span>
-                                {{ ucfirst(str_replace('_', ' ', $inscripcion->articulo->estado_articulo)) }}
-                            </span>
-                            @else
-                            <span class="text-gray-400 text-sm">No registrado</span>
-                            @endif
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                                <p class="text-gray-400 mb-1">Artículo</p>
+                                @if($inscripcion->articulo)
+                                <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
+                                    @if($inscripcion->articulo->estado_articulo === 'aceptado') bg-green-500/20 text-green-300 border border-green-500/30
+                                    @elseif($inscripcion->articulo->estado_articulo === 'rechazado') bg-red-500/20 text-red-300 border border-red-500/30
+                                    @else bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
+                                    @endif">
+                                    <span class="w-1.5 h-1.5 rounded-full
+                                        @if($inscripcion->articulo->estado_articulo === 'aceptado') bg-green-400
+                                        @elseif($inscripcion->articulo->estado_articulo === 'rechazado') bg-red-400
+                                        @else bg-yellow-400
+                                        @endif"></span>
+                                    {{ ucfirst(str_replace('_', ' ', $inscripcion->articulo->estado_articulo)) }}
+                                </span>
+                                @else
+                                <span class="text-gray-400 text-sm">No registrado</span>
+                                @endif
+                            </div>
+                            
+                            <div class="bg-black/20 p-3 rounded-lg border border-white/5">
+                                <p class="text-gray-400 mb-1">Pago</p>
+                                <span class="px-3 py-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-full
+                                    @switch($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente')
+                                        @case('pagado') bg-green-500/20 text-green-300 border border-green-500/30 @break
+                                        @case('rechazado') bg-red-500/20 text-red-300 border border-red-500/30 @break
+                                        @default bg-yellow-500/20 text-yellow-300 border border-yellow-500/30
+                                    @endswitch">
+                                    <span class="w-1.5 h-1.5 rounded-full
+                                        @switch($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente')
+                                            @case('pagado') bg-green-400 @break
+                                            @case('rechazado') bg-red-400 @break
+                                            @default bg-yellow-400
+                                        @endswitch"></span>
+                                    {{ ucfirst($inscripcion->pagoInscripcion->estado_pago ?? 'pendiente') }}
+                                </span>
+                                
+                                @if(!$inscripcion->pagoInscripcion || $inscripcion->pagoInscripcion->estado_pago === 'pendiente')
+                                <div class="flex space-x-1 mt-2">
+                                    <a href="{{ route('user.congresos.pagos.inscripcion', $inscripcion->convocatoria) }}" 
+                                       class="text-xs px-2 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 hover:text-blue-200 border border-blue-500/20 transition-all"
+                                       title="Pagar con PayPal">
+                                        <i class="fab fa-paypal"></i>
+                                    </a>
+                                    <a href="{{ route('user.congresos.pagos-terceros.validar') }}" 
+                                       class="text-xs px-2 py-1 rounded bg-green-500/10 hover:bg-green-500/20 text-green-300 hover:text-green-200 border border-green-500/20 transition-all"
+                                       title="Validar código de terceros">
+                                        <i class="fas fa-users"></i>
+                                    </a>
+                                </div>
+                                @endif
+                            </div>
                         </div>
 
                         <div class="flex justify-between space-x-3 pt-3 border-t border-white/10">

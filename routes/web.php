@@ -318,6 +318,17 @@ Route::middleware(['auth', 'role:usuario'])->group(function () {
     Route::post('/user/pagos-terceros/usar-codigo-pre-registro/{preRegistro}', [PagoTerceroController::class, 'usarCodigoEnPreRegistro'])->name('user.concursos.pagos-terceros.usar-codigo-pre-registro');
     Route::post('/user/pagos-terceros/usar-codigo-inscripcion/{inscripcion}', [PagoTerceroController::class, 'usarCodigoEnInscripcion'])->name('user.concursos.pagos-terceros.usar-codigo-inscripcion');
 
+    // Rutas para la gestión de pagos por terceros en congresos
+    Route::get('/user/congresos/pagos-terceros/validar', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'validar'])->name('user.congresos.pagos-terceros.validar');
+    Route::get('/user/congresos/pagos-terceros', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'index'])->name('user.congresos.pagos-terceros.index');
+    Route::get('/user/congresos/pagos-terceros/create', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'create'])->name('user.congresos.pagos-terceros.create');
+    Route::post('/user/congresos/pagos-terceros', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'store'])->name('user.congresos.pagos-terceros.store');
+    Route::get('/user/congresos/pagos-terceros/{pago}', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'show'])->name('user.congresos.pagos-terceros.show');
+
+    Route::post('/user/congresos/pagos-terceros/validar', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'validarCodigo'])->name('user.congresos.pagos-terceros.validar-codigo');
+    Route::post('/user/congresos/pagos-terceros/usar-codigo-inscripcion/{inscripcion}', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'usarCodigoEnInscripcion'])->name('user.congresos.pagos-terceros.usar-codigo-inscripcion');
+    Route::post('/user/congresos/pagos-terceros/usar-codigo-articulo/{articulo}', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'usarCodigoEnArticulo'])->name('user.congresos.pagos-terceros.usar-codigo-articulo');
+
     Route::get('/user/inscripciones', [UserController::class, 'inscripciones'])->name('user.inscripciones');
     Route::get('/user/certificados', [UserController::class, 'certificados'])->name('user.certificados');
     Route::get('/user/pagos', [UserController::class, 'pagos'])->name('user.pagos');

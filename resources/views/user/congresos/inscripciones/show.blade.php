@@ -322,6 +322,36 @@
                                 <i class="fas fa-file-invoice text-sm"></i>
                                 <span>Descargar comprobante</span>
                             </a>
+                            @elseif(!$inscripcion->pagoInscripcion || $inscripcion->pagoInscripcion->estado_pago === 'pendiente')
+                            <div class="space-y-3">
+                                <div class="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                                    <p class="text-yellow-200 text-sm text-center">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                                        Pago pendiente. Selecciona un método de pago:
+                                    </p>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 gap-2">
+                                    <a href="{{ route('user.congresos.pagos.inscripcion', $inscripcion->convocatoria) }}" 
+                                       class="w-full flex items-center justify-center space-x-2 px-3 py-2 rounded-lg bg-gradient-to-r from-blue-600/20 to-blue-700/20 hover:from-blue-600/30 hover:to-blue-700/30 text-blue-300 hover:text-blue-200 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300">
+                                        <i class="fab fa-paypal text-sm"></i>
+                                        <span class="text-sm">Pagar con PayPal</span>
+                                    </a>
+                                    
+                                    <a href="{{ route('user.congresos.pagos-terceros.validar') }}" 
+                                       class="w-full flex items-center justify-center space-x-2 px-3 py-2 rounded-lg bg-gradient-to-r from-green-600/20 to-green-700/20 hover:from-green-600/30 hover:to-green-700/30 text-green-300 hover:text-green-200 border border-green-500/30 hover:border-green-400/50 transition-all duration-300">
+                                        <i class="fas fa-users text-sm"></i>
+                                        <span class="text-sm">Validar Código de Terceros</span>
+                                    </a>
+                                </div>
+                            </div>
+                            @elseif($inscripcion->pagoInscripcion && $inscripcion->pagoInscripcion->estado_pago === 'rechazado')
+                            <div class="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                                <p class="text-red-200 text-sm text-center">
+                                    <i class="fas fa-times-circle mr-2"></i>
+                                    Pago rechazado. Contacta al administrador para más información.
+                                </p>
+                            </div>
                             @endif
                         </div>
                     </div>

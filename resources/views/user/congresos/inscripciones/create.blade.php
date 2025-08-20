@@ -3,15 +3,34 @@
 @section('titulo', 'Inscripción a Congreso')
 
 @section('contenido')
-<div class="container mx-auto px-4 py-8">
-    <div class="max-w-4xl mx-auto">
-        <div class="bg-gray-900 rounded-lg shadow-xl overflow-hidden">
-            <div class="p-6">
-                <h2 class="text-2xl font-bold text-white mb-6">Inscripción a Congreso</h2>
+<div class="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gradient-to-b from-space-950 to-black">
+    <!-- Efectos de fondo -->
+    <div class="absolute inset-0 overflow-hidden opacity-20">
+        <div class="absolute -top-1/4 -left-1/4 w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary-500/10 via-transparent to-transparent animate-pulse-slow"></div>
+        <div class="absolute top-1/2 left-1/2 w-96 h-96 rounded-full bg-cyan-500/10 blur-3xl animate-blob-slow transform -translate-x-1/2 -translate-y-1/2"></div>
+    </div>
+
+    <div class="w-full max-w-4xl mx-auto z-10">
+        <div class="bg-gradient-to-br from-gray-900/80 to-black/90 backdrop-blur-lg border border-white/10 rounded-xl overflow-hidden shadow-2xl transition-all duration-500 hover:shadow-[0_0_30px_rgba(139,92,246,0.3)] hover:border-purple-400/50">
+            <!-- Encabezado -->
+            <div class="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-b border-white/10 p-6">
+                <h2 class="text-2xl font-bold text-center text-white">
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">Inscripción a Congreso</span>
+                </h2>
+            </div>
+
+            <!-- Contenido -->
+            <div class="p-6 sm:p-8">
 
                 @if(session('error'))
-                    <div class="bg-red-500 text-white p-4 rounded-lg mb-6">
+                    <div class="bg-red-500/20 border border-red-500/30 text-red-300 px-4 py-3 rounded-lg mb-6 backdrop-blur-sm">
                         {{ session('error') }}
+                    </div>
+                @endif
+
+                @if(session('success'))
+                    <div class="bg-green-500/20 border border-green-500/30 text-green-300 px-4 py-3 rounded-lg mb-6 backdrop-blur-sm">
+                        {{ session('success') }}
                     </div>
                 @endif
 
@@ -20,9 +39,9 @@
                     <input type="hidden" name="convocatoria_id" value="{{ $convocatoria->id }}">
                     <input type="hidden" name="congreso_id" value="{{ $convocatoria->congreso_id }}">
 
-                    <div class="bg-gray-800/50 p-6 rounded-lg">
-                        <h3 class="text-xl font-semibold text-white mb-4">{{ $convocatoria->congreso->nombre }}</h3>
-                        <p class="text-gray-300 mb-4">{{ $convocatoria->congreso->descripcion }}</p>
+                    <div class="bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-xl shadow-2xl hover:bg-white/15 transition-all duration-300">
+                        <h3 class="text-2xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">{{ $convocatoria->congreso->nombre }}</h3>
+                        <p class="text-gray-200 mb-4 leading-relaxed">{{ $convocatoria->congreso->descripcion }}</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -31,7 +50,7 @@
                                 Tipo de Participante
                             </label>
                             <select name="tipo_participante" id="tipo_participante" required
-                                class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300 hover:bg-gray-700/50">
+                                class="w-full bg-gray-800/50 border border-gray-700/50 text-white rounded-lg px-4 py-3 focus:border-purple-500 focus:ring-purple-500/50 backdrop-blur-sm transition-all duration-300 hover:border-gray-600/70 focus:hover:border-purple-500">
                                 <option value="">Seleccione un tipo</option>
                                 <option value="estudiante" {{ old('tipo_participante') == 'estudiante' ? 'selected' : '' }}>Estudiante</option>
                                 <option value="docente" {{ old('tipo_participante') == 'docente' ? 'selected' : '' }}>Docente</option>
@@ -49,7 +68,7 @@
                             </label>
                             <input type="text" name="institucion" id="institucion" required
                                 value="{{ old('institucion') }}"
-                                class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300 hover:bg-gray-700/50">
+                                class="w-full bg-gray-800/50 border border-gray-700/50 text-white rounded-lg px-4 py-3 focus:border-purple-500 focus:ring-purple-500/50 backdrop-blur-sm transition-all duration-300 hover:border-gray-600/70 focus:hover:border-purple-500">
                             @error('institucion')
                                 <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                             @enderror
@@ -62,13 +81,7 @@
                         </label>
                         <input type="file" name="comprobante_estudiante" id="comprobante_estudiante"
                             accept=".pdf,.jpg,.jpeg,.png"
-                            class="mt-1 block w-full text-sm text-gray-300
-                                file:mr-4 file:py-2 file:px-4
-                                file:rounded-lg file:border-0
-                                file:text-sm file:font-semibold
-                                file:bg-purple-600 file:text-white
-                                hover:file:bg-purple-700
-                                transition-all duration-300">
+                            class="w-full bg-gray-800/50 border border-gray-700/50 text-white rounded-lg px-4 py-3 focus:border-purple-500 focus:ring-purple-500/50 backdrop-blur-sm transition-all duration-300 hover:border-gray-600/70 focus:hover:border-purple-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-purple-500/20 file:text-purple-300 hover:file:bg-purple-500/30">
                         <p class="mt-1 text-sm text-gray-400">Formatos permitidos: PDF, JPG, JPEG, PNG. Máximo 2MB</p>
                         @error('comprobante_estudiante')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
@@ -81,13 +94,7 @@
                         </label>
                         <input type="file" name="archivo_articulo" id="archivo_articulo"
                             accept=".pdf"
-                            class="mt-1 block w-full text-sm text-gray-300
-                                file:mr-4 file:py-2 file:px-4
-                                file:rounded-lg file:border-0
-                                file:text-sm file:font-semibold
-                                file:bg-purple-600 file:text-white
-                                hover:file:bg-purple-700
-                                transition-all duration-300">
+                            class="w-full bg-gray-800/50 border border-gray-700/50 text-white rounded-lg px-4 py-3 focus:border-purple-500 focus:ring-purple-500/50 backdrop-blur-sm transition-all duration-300 hover:border-gray-600/70 focus:hover:border-purple-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-purple-500/20 file:text-purple-300 hover:file:bg-purple-500/30">
                         <p class="mt-1 text-sm text-gray-400">Solo PDF. Máximo 10MB</p>
                         @error('archivo_articulo')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
@@ -101,7 +108,7 @@
                             </label>
                             <input type="text" name="titulo_articulo" id="titulo_articulo"
                                 value="{{ old('titulo_articulo') }}"
-                                class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300 hover:bg-gray-700/50">
+                                class="w-full bg-gray-800/50 border border-gray-700/50 text-white rounded-lg px-4 py-3 focus:border-purple-500 focus:ring-purple-500/50 backdrop-blur-sm transition-all duration-300 hover:border-gray-600/70 focus:hover:border-purple-500">
                             @error('titulo_articulo')
                                 <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                             @enderror
@@ -116,21 +123,21 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-300">Nombre</label>
                                         <input type="text" name="autores[0][nombre]" required
-                                            class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300 hover:bg-gray-700/50">
+                                            class="w-full bg-gray-800/50 border border-gray-700/50 text-white rounded-lg px-4 py-3 focus:border-purple-500 focus:ring-purple-500/50 backdrop-blur-sm transition-all duration-300 hover:border-gray-600/70 focus:hover:border-purple-500">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-300">Correo</label>
                                         <input type="email" name="autores[0][correo]" required
-                                            class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300 hover:bg-gray-700/50">
+                                            class="w-full bg-gray-800/50 border border-gray-700/50 text-white rounded-lg px-4 py-3 focus:border-purple-500 focus:ring-purple-500/50 backdrop-blur-sm transition-all duration-300 hover:border-gray-600/70 focus:hover:border-purple-500">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-300">Institución</label>
                                         <input type="text" name="autores[0][institucion]" required
-                                            class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-800/50 text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 transition-all duration-300 hover:bg-gray-700/50">
+                                            class="w-full bg-gray-800/50 border border-gray-700/50 text-white rounded-lg px-4 py-3 focus:border-purple-500 focus:ring-purple-500/50 backdrop-blur-sm transition-all duration-300 hover:border-gray-600/70 focus:hover:border-purple-500">
                                     </div>
                                 </div>
                             </div>
-                            <button type="button" id="agregar_autor" class="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-300">
+                            <button type="button" id="agregar_autor" class="mt-4 px-6 py-3 bg-purple-500/20 border border-purple-500/50 text-purple-300 rounded-lg hover:bg-purple-500/30 hover:border-purple-400 backdrop-blur-sm transition-all duration-300 font-medium">
                                 Agregar Autor
                             </button>
                             @error('autores')
@@ -141,15 +148,88 @@
 
                     <div class="flex justify-end space-x-4">
                         <a href="{{ route('user.congresos.inscripciones.index') }}"
-                            class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-300">
+                            class="px-6 py-3 bg-gray-500/20 border border-gray-500/50 text-gray-300 rounded-lg hover:bg-gray-500/30 hover:border-gray-400 backdrop-blur-sm transition-all duration-300 font-medium">
                             Cancelar
                         </a>
                         <button type="submit"
-                            class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-300">
+                            class="px-6 py-3 bg-purple-500/20 border border-purple-500/50 text-purple-300 rounded-lg hover:bg-purple-500/30 hover:border-purple-400 backdrop-blur-sm transition-all duration-300 font-medium">
                             Crear Inscripción
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+        
+        <!-- Sección de Métodos de Pago -->
+        <div class="max-w-4xl mx-auto mt-8 bg-black/30 backdrop-blur-xl rounded-2xl overflow-hidden border border-white/10 relative transition-all duration-300 hover:border-white/20 hover:shadow-[0_0_30px_rgba(147,51,234,0.3)]">
+            <div class="p-8">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center flex items-center justify-center gap-3">
+                    <i class="fas fa-credit-card text-purple-400"></i>
+                    Métodos de Pago Disponibles
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- PayPal -->
+                    <div class="bg-white/5 rounded-xl p-6 border border-white/10 hover:border-purple-500/30 transition-all duration-300">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="p-3 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20">
+                                <i class="fab fa-paypal text-2xl text-blue-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">PayPal</h3>
+                                <p class="text-sm text-white/70">Pago inmediato y seguro</p>
+                            </div>
+                        </div>
+                        <p class="text-white/80 text-sm mb-4">
+                            Realiza tu pago de forma segura con PayPal. Una vez completado el pago, podrás proceder con tu inscripción.
+                        </p>
+                        <a href="{{ route('user.congresos.pagos.inscripcion', $convocatoria) }}" 
+                           class="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-600/20 to-blue-700/20 hover:from-blue-600/30 hover:to-blue-700/30 text-blue-300 hover:text-blue-200 border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300">
+                            <i class="fab fa-paypal"></i>
+                            <span>Pagar con PayPal</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Pago por Terceros -->
+                    <div class="bg-white/5 rounded-xl p-6 border border-white/10 hover:border-green-500/30 transition-all duration-300">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="p-3 rounded-lg bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20">
+                                <i class="fas fa-users text-2xl text-green-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-white">Pago por Terceros</h3>
+                                <p class="text-sm text-white/70">Transferencia bancaria</p>
+                            </div>
+                        </div>
+                        <p class="text-white/80 text-sm mb-4">
+                            ¿Tu institución pagará por ti? Usa un código de validación de pago por terceros para completar tu inscripción.
+                        </p>
+                        <div class="space-y-2">
+                            <a href="{{ route('user.congresos.pagos-terceros.create') }}" 
+                               class="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-600/20 to-green-700/20 hover:from-green-600/30 hover:to-green-700/30 text-green-300 hover:text-green-200 border border-green-500/30 hover:border-green-400/50 transition-all duration-300">
+                                <i class="fas fa-plus"></i>
+                                <span>Registrar Pago</span>
+                            </a>
+                            <a href="{{ route('user.congresos.pagos-terceros.validar') }}" 
+                               class="w-full flex items-center justify-center space-x-2 px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/90 hover:text-white border border-white/10 hover:border-white/20 transition-all duration-300">
+                                <i class="fas fa-search"></i>
+                                <span>Validar Código</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                    <div class="flex items-start space-x-3">
+                        <i class="fas fa-info-circle text-yellow-400 mt-1"></i>
+                        <div>
+                            <h4 class="text-yellow-300 font-medium mb-1">Información Importante</h4>
+                            <p class="text-yellow-200/80 text-sm">
+                                Debes completar el pago antes de enviar tu inscripción. Una vez realizado el pago, podrás proceder con el formulario de inscripción.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -305,4 +385,38 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleArticuloFields();
 });
 </script>
+
+<style>
+@keyframes pulse-slow {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes blob-slow {
+    0% {
+        transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
+}
+
+.pulse-slow {
+    animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.blob-slow {
+    animation: blob-slow 7s ease-in-out infinite;
+}
+</style>
 @endsection

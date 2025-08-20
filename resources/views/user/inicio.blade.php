@@ -21,17 +21,30 @@
     <!-- Accesos Rápidos -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <!-- Tarjeta de Validación de Código -->
+            <!-- Tarjeta de Validación de Código Concurso -->
             <a href="{{ route('user.concursos.pagos-terceros.validar') }}"
                 class="group bg-space-900/40 backdrop-blur-md rounded-2xl p-6 border border-white/5 hover:border-emerald-500/50 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]">
                 <div class="flex items-center justify-between mb-4">
                     <div class="p-3 bg-emerald-500/10 rounded-xl group-hover:scale-110 transition-transform duration-500">
                         <i class="fas fa-key text-2xl text-emerald-500/80 group-hover:text-emerald-500 transition-colors"></i>
                     </div>
-                    <span class="text-gray-300 group-hover:text-white transition-colors duration-500">Validar</span>
+                    <span class="text-gray-300 group-hover:text-white transition-colors duration-500">Concurso</span>
                 </div>
-                <h3 class="text-xl font-light text-white mb-2 tracking-wide">Validar Código</h3>
-                <p class="text-gray-300 group-hover:text-gray-200 transition-colors duration-500">Valida tu código de pago</p>
+                <h3 class="text-xl font-light text-white mb-2 tracking-wide">Código Concurso</h3>
+                <p class="text-gray-300 group-hover:text-gray-200 transition-colors duration-500">Valida código de concurso</p>
+            </a>
+
+            <!-- Tarjeta de Validación de Código Congreso -->
+            <a href="{{ route('user.congresos.pagos-terceros.validar') }}"
+                class="group bg-space-900/40 backdrop-blur-md rounded-2xl p-6 border border-white/5 hover:border-blue-500/50 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform duration-500">
+                        <i class="fas fa-key text-2xl text-blue-500/80 group-hover:text-blue-500 transition-colors"></i>
+                    </div>
+                    <span class="text-gray-300 group-hover:text-white transition-colors duration-500">Congreso</span>
+                </div>
+                <h3 class="text-xl font-light text-white mb-2 tracking-wide">Código Congreso</h3>
+                <p class="text-gray-300 group-hover:text-gray-200 transition-colors duration-500">Valida código de congreso</p>
             </a>
 
             <!-- Tarjeta de Eventos -->
@@ -361,12 +374,12 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Tarjeta para Usar Código -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Tarjeta para Usar Código de Concurso -->
                 <div class="bg-black/20 backdrop-blur-lg rounded-2xl p-6 border border-purple-500/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(147,51,234,0.1)]">
                     <div class="flex items-start justify-between mb-4">
                         <h3 class="text-xl font-light text-white tracking-wide group-hover:text-purple-500/90 transition-colors duration-500">
-                            Validar Código
+                            Validar Código Concurso
                         </h3>
                         <span class="px-3 py-1 text-xs font-medium rounded-full bg-purple-500/20 text-purple-400">
                             <i class="fas fa-key mr-1"></i>Validación
@@ -375,21 +388,53 @@
                     <div class="space-y-3 mb-6">
                         <div class="flex items-center text-sm text-gray-300">
                             <i class="fas fa-user-plus w-5 text-gray-400"></i>
-                            <span>Usar código para pre-registro</span>
+                            <span>Usar código para pre-registro de concurso</span>
                         </div>
                         <div class="flex items-center text-sm text-gray-300">
                             <i class="fas fa-clipboard-list w-5 text-gray-400"></i>
-                            <span>Usar código para inscripción</span>
+                            <span>Usar código para inscripción de concurso</span>
                         </div>
                         <div class="flex items-center text-sm text-gray-300">
                             <i class="fas fa-info-circle w-5 text-gray-400"></i>
-                            <span>Valida el código proporcionado por un tercero</span>
+                            <span>Valida el código proporcionado por un tercero para concursos</span>
                         </div>
                     </div>
                     <div class="flex space-x-2">
                         <a href="{{ route('user.concursos.pagos-terceros.validar') }}" class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-purple-600/80 to-blue-600/80 text-white rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all duration-500 transform hover:scale-[1.02] hover:shadow-lg group">
                             <i class="fas fa-key mr-2 group-hover:scale-110 transition-transform"></i>
-                            <span>Validar y Usar Código</span>
+                            <span>Validar y Usar Código Concurso</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tarjeta para Usar Código de Congreso -->
+                <div class="bg-black/20 backdrop-blur-lg rounded-2xl p-6 border border-blue-500/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.1)]">
+                    <div class="flex items-start justify-between mb-4">
+                        <h3 class="text-xl font-light text-white tracking-wide group-hover:text-blue-500/90 transition-colors duration-500">
+                            Validar Código Congreso
+                        </h3>
+                        <span class="px-3 py-1 text-xs font-medium rounded-full bg-blue-500/20 text-blue-400">
+                            <i class="fas fa-key mr-1"></i>Validación
+                        </span>
+                    </div>
+                    <div class="space-y-3 mb-6">
+                        <div class="flex items-center text-sm text-gray-300">
+                            <i class="fas fa-user-plus w-5 text-gray-400"></i>
+                            <span>Usar código para inscripción de congreso</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-300">
+                            <i class="fas fa-clipboard-list w-5 text-gray-400"></i>
+                            <span>Usar código para artículos de congreso</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-300">
+                            <i class="fas fa-info-circle w-5 text-gray-400"></i>
+                            <span>Valida el código proporcionado por un tercero para congresos</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="{{ route('user.congresos.pagos-terceros.validar') }}" class="w-full inline-flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-600/80 to-cyan-600/80 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all duration-500 transform hover:scale-[1.02] hover:shadow-lg group">
+                            <i class="fas fa-key mr-2 group-hover:scale-110 transition-transform"></i>
+                            <span>Validar y Usar Código Congreso</span>
                         </a>
                     </div>
                 </div>
@@ -493,7 +538,6 @@
             </div>
         </div>
     </div>
-    @push('scripts')
         <script>
             function copiarCodigo(codigo) {
                 navigator.clipboard.writeText(codigo).then(function() {
@@ -527,5 +571,4 @@
                 });
             }
         </script>
-    @endpush
 @endsection
