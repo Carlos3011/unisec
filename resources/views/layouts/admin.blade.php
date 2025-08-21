@@ -49,7 +49,7 @@
               <a href="{{ route('admin.categorias.index') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
                 <i class="fas fa-tags mr-2"></i>Categorías
               </a>
-              <a href="{{ route('admin.cursos.index') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
+              <!-- <a href="{{ route('admin.cursos.index') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
                 <i class="fas fa-book mr-2"></i>Cursos
               </a>
               <a href="{{ route('admin.talleres.index')}}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
@@ -57,7 +57,7 @@
               </a>
               <a href="#" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
                 <i class="fas fa-presentation mr-2"></i>Ponencias
-              </a>
+              </a> -->
             </div>
           </div>
         </div>
@@ -82,6 +82,44 @@
               <a href="{{ route('admin.concursos.pre-registros.index') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
                 <i class="fas fa-clipboard-list mr-2"></i>Pre-Registro
               </a>
+              <!-- Pagos Transferencias -->
+              <div x-data="{ openTransferencias: false }" class="relative">
+                <button @click="openTransferencias = !openTransferencias" class="flex items-center justify-between w-full px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
+                  <div class="flex items-center">
+                    <i class="fas fa-exchange-alt mr-2"></i>Pagos Transferencias
+                  </div>
+                  <i class="fas fa-chevron-down text-xs transition-transform" :class="{ 'transform rotate-180': openTransferencias }"></i>
+                </button>
+                <div x-show="openTransferencias" class="mt-1 space-y-1" x-collapse>
+                  <div class="pl-6 border-l border-white/10">
+                    <a href="{{ route('admin.concursos.pagos-terceros.index') }}" class="block px-3 py-1.5 rounded-lg hover:bg-white/10 transition-all text-xs">
+                      <i class="fas fa-clipboard-list mr-2"></i>Pre-Registro
+                    </a>
+                    <a href="#" class="block px-3 py-1.5 rounded-lg hover:bg-white/10 transition-all text-xs opacity-60">
+                      <i class="fas fa-user-check mr-2"></i>Inscripción
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <!-- Pagos PayPal -->
+              <div x-data="{ openPaypal: false }" class="relative">
+                <button @click="openPaypal = !openPaypal" class="flex items-center justify-between w-full px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
+                  <div class="flex items-center">
+                    <i class="fas fa-credit-card mr-2"></i>Pagos PayPal
+                  </div>
+                  <i class="fas fa-chevron-down text-xs transition-transform" :class="{ 'transform rotate-180': openPaypal }"></i>
+                </button>
+                <div x-show="openPaypal" class="mt-1 space-y-1" x-collapse>
+                  <div class="pl-6 border-l border-white/10">
+                    <a href="{{ route('admin.pagos.index') }}" class="block px-3 py-1.5 rounded-lg hover:bg-white/10 transition-all text-xs">
+                      <i class="fas fa-clipboard-list mr-2"></i>Pre-Registro
+                    </a>
+                    <a href="#" class="block px-3 py-1.5 rounded-lg hover:bg-white/10 transition-all text-xs opacity-60">
+                      <i class="fas fa-user-check mr-2"></i>Inscripción
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -106,6 +144,38 @@
               <a href="{{ route('admin.congresos.inscripciones.index')  }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
                 <i class="fas fa-user-plus mr-2"></i>Inscripciones
               </a>
+              <!-- Pagos Transferencias -->
+              <div x-data="{ openTransferencias: false }" class="relative">
+                <button @click="openTransferencias = !openTransferencias" class="flex items-center justify-between w-full px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
+                  <div class="flex items-center">
+                    <i class="fas fa-exchange-alt mr-2"></i>Pagos Transferencias
+                  </div>
+                  <i class="fas fa-chevron-down text-xs transition-transform" :class="{ 'transform rotate-180': openTransferencias }"></i>
+                </button>
+                <div x-show="openTransferencias" class="mt-1 space-y-1" x-collapse>
+                  <div class="pl-6 border-l border-white/10">
+                    <a href="{{ route('admin.congresos.pagos-terceros.index') }}" class="block px-3 py-1.5 rounded-lg hover:bg-white/10 transition-all text-xs">
+                      <i class="fas fa-user-check mr-2"></i>Inscripción
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <!-- Pagos PayPal -->
+              <div x-data="{ openPaypal: false }" class="relative">
+                <button @click="openPaypal = !openPaypal" class="flex items-center justify-between w-full px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
+                  <div class="flex items-center">
+                    <i class="fas fa-credit-card mr-2"></i>Pagos PayPal
+                  </div>
+                  <i class="fas fa-chevron-down text-xs transition-transform" :class="{ 'transform rotate-180': openPaypal }"></i>
+                </button>
+                <div x-show="openPaypal" class="mt-1 space-y-1" x-collapse>
+                  <div class="pl-6 border-l border-white/10">
+                    <a href="{{ route('admin.congresos.pagos.index') }}" class="block px-3 py-1.5 rounded-lg hover:bg-white/10 transition-all text-xs">
+                      <i class="fas fa-user-check mr-2"></i>Inscripción
+                    </a>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -147,51 +217,6 @@
               </a>
               <a href="{{ route('admin.ponentes.index') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
                 <i class="fas fa-chalkboard-teacher mr-2"></i>Ponentes
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Administración Financiera -->
-        <div x-data="{ open: false }" class="relative">
-          <button @click="open = !open" class="flex items-center justify-between w-full px-4 py-3 rounded-lg hover:bg-white/10 transition-all group">
-            <div class="flex items-center">
-              <i class="fas fa-file-invoice text-lg w-6 text-center text-white/80 group-hover:text-white"></i>
-              <span class="ml-3 font-medium">Administración Financiera</span>
-            </div>
-            <i class="fas fa-chevron-down text-sm transition-transform" :class="{ 'transform rotate-180': open }"></i>
-          </button>
-          <div x-show="open" class="mt-2 space-y-1" x-collapse>
-            <div class="pl-10 border-l-2 border-white/10">
-              <a href="{{ route('admin.pagos-terceros.index') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
-                <i class="fas fa-exchange-alt mr-2"></i>Pagos Transferencias Concurso
-              </a>
-              <a href="{{ route('admin.congresos.pagos-terceros.index') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
-                <i class="fas fa-exchange-alt mr-2"></i>Pagos Transferencias Congreso
-              </a>
-              <a href="{{ route('admin.becas') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
-                <i class="fas fa-gift mr-2"></i>Becas
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pagos con PayPal -->
-        <div x-data="{ open: false }" class="relative">
-          <button @click="open = !open" class="flex items-center justify-between w-full px-4 py-3 rounded-lg hover:bg-white/10 transition-all group">
-            <div class="flex items-center">
-              <i class="fab fa-paypal text-lg w-6 text-center text-white/80 group-hover:text-white"></i>
-              <span class="ml-3 font-medium">Pagos con PayPal</span>
-            </div>
-            <i class="fas fa-chevron-down text-sm transition-transform" :class="{ 'transform rotate-180': open }"></i>
-          </button>
-          <div x-show="open" class="mt-2 space-y-1" x-collapse>
-            <div class="pl-10 border-l-2 border-white/10">
-              <a href="{{ route('admin.pagos.index') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
-                <i class="fas fa-credit-card mr-2"></i>Pagos Concursos
-              </a>
-              <a href="{{ route('admin.congresos.pagos.index') }}" class="block px-4 py-2 rounded-lg hover:bg-white/10 transition-all text-sm">
-                <i class="fas fa-credit-card mr-2"></i>Pagos Congresos
               </a>
             </div>
           </div>

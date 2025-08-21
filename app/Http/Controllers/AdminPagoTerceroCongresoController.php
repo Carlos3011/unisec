@@ -15,7 +15,11 @@ class AdminPagoTerceroCongresoController extends Controller
      */
     public function index(Request $request)
     {
-        $query = PagoTerceroTransferenciaCongreso::with(['congreso']);
+        $query = PagoTerceroTransferenciaCongreso::with([
+            'congreso',
+            'inscripcionesCongreso.usuario',
+            'articulosCongreso.usuario'
+        ]);
 
         // Filtros
         if ($request->filled('tipo')) {
@@ -157,7 +161,11 @@ class AdminPagoTerceroCongresoController extends Controller
      */
     public function show($id)
     {
-        $pago = PagoTerceroTransferenciaCongreso::with(['congreso'])->findOrFail($id);
+        $pago = PagoTerceroTransferenciaCongreso::with([
+            'congreso',
+            'inscripcionesCongreso.usuario',
+            'articulosCongreso.usuario'
+        ])->findOrFail($id);
         
         return view('admin.congresos.pagos-terceros.show', compact('pago'));
     }

@@ -178,9 +178,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/reportes-estadisticas', [AdminController::class, 'reportesEstadisticas'])->name('admin.reportes-estadisticas');
 
     // Rutas para la gestión de pagos de terceros
-    Route::get('/admin/pagos-terceros', [AdminPagoTerceroController::class, 'index'])->name('admin.pagos-terceros.index');
-    Route::get('/admin/pagos-terceros/{pago}', [AdminPagoTerceroController::class, 'show'])->name('admin.pagos-terceros.show');
-    Route::put('/admin/pagos-terceros/{pago}/estado', [AdminPagoTerceroController::class, 'updateEstado'])->name('admin.pagos-terceros.update-estado');
+    Route::get('/admin/concursos/pagos-terceros', [AdminPagoTerceroController::class, 'index'])->name('admin.concursos.pagos-terceros.index');
+    Route::get('/admin/concursos/pagos-terceros/create', [AdminPagoTerceroController::class, 'create'])->name('admin.concursos.pagos-terceros.create');
+    Route::post('/admin/concursos/pagos-terceros', [AdminPagoTerceroController::class, 'store'])->name('admin.concursos.pagos-terceros.store');
+    Route::get('/admin/concursos/pagos-terceros/{pago}', [AdminPagoTerceroController::class, 'show'])->name('admin.concursos.pagos-terceros.show');
+    Route::put('/admin/concursos/pagos-terceros/{pago}/estado', [AdminPagoTerceroController::class, 'updateEstado'])->name('admin.concursos.pagos-terceros.update-estado');
+    Route::get('/admin/concursos/pagos-terceros/precios/{concurso}', [AdminPagoTerceroController::class, 'obtenerPrecios'])->name('admin.concursos.pagos-terceros.precios');
 
     // Rutas para la gestión de pagos de terceros de congresos
     Route::get('/admin/congresos/pagos-terceros', [AdminPagoTerceroCongresoController::class, 'index'])->name('admin.congresos.pagos-terceros.index');

@@ -1,11 +1,11 @@
 @extends('layouts.admin')
 
 @section('contenido')
-<div class="relative z-10 min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+<div class="relative z-10 min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
     <!-- Header con breadcrumb mejorado -->
     <div class="mb-8">
         <nav class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
-            <a href="{{ route('admin.congresos.pagos-terceros.index') }}" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            <a href="{{ route('admin.concursos.pagos-terceros.index') }}" class="hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
                 <i class="fas fa-home mr-1"></i>Pagos de Terceros
             </a>
             <i class="fas fa-chevron-right text-xs"></i>
@@ -13,12 +13,12 @@
         </nav>
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
-                <a href="{{ route('admin.congresos.pagos-terceros.index') }}" class="group flex items-center space-x-2 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 transition-all duration-200 shadow-sm hover:shadow-md">
+                <a href="{{ route('admin.concursos.pagos-terceros.index') }}" class="group flex items-center space-x-2 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-600 transition-all duration-200 shadow-sm hover:shadow-md">
                     <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform duration-200"></i>
                     <span>Volver a la lista</span>
                 </a>
                 <div class="flex items-center space-x-2 text-gray-600 dark:text-gray-400">
-                    <i class="fas fa-file-invoice-dollar text-blue-500"></i>
+                    <i class="fas fa-trophy text-purple-500"></i>
                     <span class="text-lg font-semibold text-gray-800 dark:text-gray-200">Pago #{{ $pago->id }}</span>
                 </div>
             </div>
@@ -40,15 +40,15 @@
     <!-- Tarjeta principal con diseño mejorado -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
         <!-- Header de la tarjeta -->
-        <div class="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-8 py-6">
+        <div class="bg-gradient-to-r from-purple-600 via-purple-700 to-pink-700 px-8 py-6">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <div class="bg-white/20 p-3 rounded-xl">
-                        <i class="fas fa-university text-white text-xl"></i>
+                        <i class="fas fa-trophy text-white text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-bold text-white">Detalles del Pago - Congreso</h1>
-                        <p class="text-blue-100 text-sm mt-1">Información completa del pago de terceros</p>
+                        <h1 class="text-2xl font-bold text-white">Detalles del Pago - Concurso</h1>
+                        <p class="text-purple-100 text-sm mt-1">Información completa del pago de terceros</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-3">
@@ -78,24 +78,24 @@
         <!-- Contenido principal -->
         <div class="p-8 bg-gray-50 dark:bg-gray-900">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Información del Congreso -->
+                <!-- Información del Concurso -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
                         <div class="flex items-center space-x-3">
                             <div class="bg-white/20 p-2 rounded-lg">
-                                <i class="fas fa-university text-white"></i>
+                                <i class="fas fa-trophy text-white"></i>
                             </div>
-                            <h3 class="text-lg font-semibold text-white">Información del Congreso</h3>
+                            <h3 class="text-lg font-semibold text-white">Información del Concurso</h3>
                         </div>
                     </div>
                     <div class="p-6 space-y-4">
                         <div class="flex items-start space-x-3">
-                            <div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg">
-                                <i class="fas fa-tag text-blue-600 dark:text-blue-400"></i>
+                            <div class="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-lg">
+                                <i class="fas fa-award text-purple-600 dark:text-purple-400"></i>
                             </div>
                             <div class="flex-1">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Congreso</p>
-                                <p class="font-semibold text-gray-900 dark:text-gray-100">{{ $pago->congreso->nombre }}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Concurso</p>
+                                <p class="font-semibold text-gray-900 dark:text-gray-100">{{ $pago->concurso->titulo }}</p>
                             </div>
                         </div>
                         
@@ -121,8 +121,8 @@
                         
                         @if($pago->fecha_validacion)
                         <div class="flex items-start space-x-3">
-                            <div class="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-lg">
-                                <i class="fas fa-check-circle text-purple-600 dark:text-purple-400"></i>
+                            <div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg">
+                                <i class="fas fa-check-circle text-blue-600 dark:text-blue-400"></i>
                             </div>
                             <div class="flex-1">
                                 <p class="text-sm text-gray-500 dark:text-gray-400">Fecha de validación</p>
@@ -132,13 +132,13 @@
                         @endif
                         
                         @if($pago->codigo_validacion_unico)
-                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-4 rounded-xl border border-blue-200 dark:border-blue-700">
+                        <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 p-4 rounded-xl border border-purple-200 dark:border-purple-700">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-sm text-blue-600 dark:text-blue-400 font-medium">Código de validación</p>
-                                    <p class="font-mono text-lg font-bold text-blue-800 dark:text-blue-300 mt-1">{{ $pago->codigo_validacion_unico }}</p>
+                                    <p class="text-sm text-purple-600 dark:text-purple-400 font-medium">Código de validación</p>
+                                    <p class="font-mono text-lg font-bold text-purple-800 dark:text-purple-300 mt-1">{{ $pago->codigo_validacion_unico }}</p>
                                 </div>
-                                <button onclick="copyToClipboard('{{ $pago->codigo_validacion_unico }}')" class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg transition-colors duration-200" title="Copiar código">
+                                <button onclick="copyToClipboard('{{ $pago->codigo_validacion_unico }}')" class="bg-purple-500 hover:bg-purple-600 text-white p-2 rounded-lg transition-colors duration-200" title="Copiar código">
                                     <i class="fas fa-copy"></i>
                                 </button>
                             </div>
@@ -232,6 +232,16 @@
                     <div class="p-6">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div class="text-center">
+                                <div class="mx-auto w-16 h-16 {{ $pago->cubre_pre_registro ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30' }} rounded-full flex items-center justify-center mb-3">
+                                    <i class="fas {{ $pago->cubre_pre_registro ? 'fa-check text-green-600 dark:text-green-400' : 'fa-times text-red-600 dark:text-red-400' }} text-xl"></i>
+                                </div>
+                                <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-1">Pre-registro</h4>
+                                <p class="text-sm {{ $pago->cubre_pre_registro ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} font-medium">
+                                    {{ $pago->cubre_pre_registro ? 'Cubierto' : 'No cubierto' }}
+                                </p>
+                            </div>
+                            
+                            <div class="text-center">
                                 <div class="mx-auto w-16 h-16 {{ $pago->cubre_inscripcion ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30' }} rounded-full flex items-center justify-center mb-3">
                                     <i class="fas {{ $pago->cubre_inscripcion ? 'fa-check text-green-600 dark:text-green-400' : 'fa-times text-red-600 dark:text-red-400' }} text-xl"></i>
                                 </div>
@@ -242,21 +252,11 @@
                             </div>
                             
                             <div class="text-center">
-                                <div class="mx-auto w-16 h-16 {{ $pago->cubre_articulo ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30' }} rounded-full flex items-center justify-center mb-3">
-                                    <i class="fas {{ $pago->cubre_articulo ? 'fa-check text-green-600 dark:text-green-400' : 'fa-times text-red-600 dark:text-red-400' }} text-xl"></i>
-                                </div>
-                                <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-1">Artículos</h4>
-                                <p class="text-sm {{ $pago->cubre_articulo ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} font-medium">
-                                    {{ $pago->cubre_articulo ? 'Cubiertos' : 'No cubiertos' }}
-                                </p>
-                            </div>
-                            
-                            <div class="text-center">
-                                <div class="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-3">
-                                    <i class="fas fa-users text-blue-600 dark:text-blue-400 text-xl"></i>
+                                <div class="mx-auto w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-3">
+                                    <i class="fas fa-users text-purple-600 dark:text-purple-400 text-xl"></i>
                                 </div>
                                 <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-1">Número de pagos</h4>
-                                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $pago->numero_pagos }}</p>
+                                <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ $pago->numero_pagos }}</p>
                             </div>
                         </div>
                     </div>
@@ -276,10 +276,10 @@
                                 <h3 class="text-lg font-semibold text-white">Usuarios que utilizaron el código</h3>
                             </div>
                             @php
-                                $usuariosInscripciones = $pago->inscripcionesCongreso->pluck('usuario')->filter();
-                                $usuariosArticulos = $pago->articulosCongreso->pluck('usuario')->filter();
-                                $todosUsuarios = $usuariosInscripciones->merge($usuariosArticulos)->unique('id');
-                                $totalUsos = $pago->inscripcionesCongreso->count() + $pago->articulosCongreso->count();
+                                $usuariosPreRegistros = $pago->preRegistros->pluck('usuario')->filter();
+                                $usuariosInscripciones = $pago->inscripciones->pluck('usuario')->filter();
+                                $todosUsuarios = $usuariosPreRegistros->merge($usuariosInscripciones)->unique('id');
+                                $totalUsos = $pago->preRegistros->count() + $pago->inscripciones->count();
                                 $porcentajeUso = $pago->numero_pagos > 0 ? ($totalUsos / $pago->numero_pagos) * 100 : 0;
                             @endphp
                             <div class="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-xl">
@@ -306,41 +306,41 @@
 
                         @if($todosUsuarios->count() > 0)
                             <div class="space-y-4">
-                                <h4 class="font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                                    <i class="fas fa-list-ul mr-2 text-purple-500"></i>
+                                <h4 class="font-semibold text-gray-800 dark:text-gray-200 text-lg mb-4 flex items-center">
+                                    <i class="fas fa-list-ul text-purple-500 mr-2"></i>
                                     Lista de usuarios ({{ $todosUsuarios->count() }})
                                 </h4>
                                 <div class="grid gap-4">
                                     @foreach($todosUsuarios as $usuario)
                                         <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 p-4 rounded-xl border border-gray-200 dark:border-gray-600 hover:shadow-md transition-all duration-200">
                                             <div class="flex items-center justify-between">
-                                                <div class="flex items-center space-x-4">
-                                                    <div class="bg-gradient-to-br from-purple-500 to-pink-500 w-12 h-12 rounded-full flex items-center justify-center">
-                                                        <i class="fas fa-user text-white"></i>
+                                                <div class="flex items-center space-x-3">
+                                                    <div class="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-full">
+                                                        <i class="fas fa-user text-purple-600 dark:text-purple-400"></i>
                                                     </div>
                                                     <div>
                                                         <p class="font-semibold text-gray-900 dark:text-gray-100">{{ $usuario->name }}</p>
                                                         <p class="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                                                            <i class="fas fa-envelope mr-1"></i>
+                                                            <i class="fas fa-envelope text-xs mr-1"></i>
                                                             {{ $usuario->email }}
                                                         </p>
                                                     </div>
                                                 </div>
                                                 <div class="flex flex-col space-y-1">
                                                     @php
-                                                        $inscripciones = $pago->inscripcionesCongreso->where('usuario_id', $usuario->id);
-                                                        $articulos = $pago->articulosCongreso->where('usuario_id', $usuario->id);
+                                                        $preRegistros = $pago->preRegistros->where('usuario_id', $usuario->id);
+                                                        $inscripciones = $pago->inscripciones->where('usuario_id', $usuario->id);
                                                     @endphp
-                                                    @if($inscripciones->count() > 0)
-                                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                                                            <i class="fas fa-user-check mr-1"></i>
-                                                            Inscripción
+                                                    @if($preRegistros->count() > 0)
+                                                        <span class="inline-flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-medium px-3 py-1 rounded-full shadow-sm">
+                                                            <i class="fas fa-user-plus mr-1"></i>
+                                                            Pre-registro
                                                         </span>
                                                     @endif
-                                                    @if($articulos->count() > 0)
-                                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                                                            <i class="fas fa-file-alt mr-1"></i>
-                                                            {{ $articulos->count() }} Artículo(s)
+                                                    @if($inscripciones->count() > 0)
+                                                        <span class="inline-flex items-center bg-gradient-to-r from-green-400 to-emerald-500 text-white text-xs font-medium px-3 py-1 rounded-full shadow-sm">
+                                                            <i class="fas fa-check-circle mr-1"></i>
+                                                            Inscripción
                                                         </span>
                                                     @endif
                                                 </div>
@@ -351,11 +351,11 @@
                             </div>
                         @else
                             <div class="text-center py-12">
-                                <div class="bg-gray-100 dark:bg-gray-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <div class="bg-gray-100 dark:bg-gray-700 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
                                     <i class="fas fa-users text-3xl text-gray-400 dark:text-gray-500"></i>
                                 </div>
-                                <h4 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Sin usuarios registrados</h4>
-                                <p class="text-gray-500 dark:text-gray-400">Aún no hay usuarios que hayan utilizado este código de validación</p>
+                                <h4 class="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">Sin usuarios registrados</h4>
+                                <p class="text-gray-500 dark:text-gray-500">Aún no hay usuarios que hayan utilizado este código de validación</p>
                             </div>
                         @endif
                     </div>
@@ -366,7 +366,7 @@
             <!-- Comprobante de Pago -->
             <div class="mt-8">
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="bg-gradient-to-r from-orange-500 to-red-600 px-6 py-4">
+                    <div class="bg-gradient-to-r from-blue-500 to-cyan-600 px-6 py-4">
                         <div class="flex items-center space-x-3">
                             <div class="bg-white/20 p-2 rounded-lg">
                                 <i class="fas fa-file-invoice text-white"></i>
@@ -376,32 +376,33 @@
                     </div>
                     <div class="p-6">
                         @if($pago->comprobante_pago)
-                            <div class="flex items-center justify-between bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 p-4 rounded-xl border border-orange-200 dark:border-orange-700">
+                            <div class="flex items-center justify-between bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-4 rounded-xl border border-blue-200 dark:border-blue-700">
                                 <div class="flex items-center space-x-3">
-                                    <div class="bg-orange-100 dark:bg-orange-900/30 p-3 rounded-lg">
-                                        <i class="fas fa-file-pdf text-orange-600 dark:text-orange-400 text-xl"></i>
+                                    <div class="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg">
+                                        <i class="fas fa-file-pdf text-blue-600 dark:text-blue-400 text-xl"></i>
                                     </div>
                                     <div>
                                         <p class="font-semibold text-gray-900 dark:text-gray-100">Comprobante disponible</p>
-                                        <p class="text-sm text-gray-600 dark:text-gray-400">Haz clic para descargar o visualizar</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">Haz clic para ver el documento</p>
                                     </div>
                                 </div>
-                                <a href="{{ asset($pago->comprobante_pago) }}" target="_blank" class="group flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white font-medium py-2.5 px-5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                                <a href="{{ asset($pago->comprobante_pago) }}" target="_blank" class="group flex items-center space-x-2 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 px-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                                     <i class="fas fa-external-link-alt group-hover:scale-110 transition-transform duration-200"></i>
                                     <span>Ver comprobante</span>
                                 </a>
                             </div>
                         @else
                             <div class="text-center py-8">
-                                <div class="bg-gray-100 dark:bg-gray-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <div class="bg-gray-100 dark:bg-gray-700 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                                     <i class="fas fa-file-times text-2xl text-gray-400 dark:text-gray-500"></i>
                                 </div>
-                                <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2">Sin comprobante</h4>
-                                <p class="text-gray-500 dark:text-gray-400">No hay comprobante de pago disponible</p>
+                                <h4 class="font-medium text-gray-600 dark:text-gray-400 mb-2">Sin comprobante</h4>
+                                <p class="text-gray-500 dark:text-gray-500">No hay comprobante de pago disponible</p>
                             </div>
                         @endif
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </div>
@@ -413,7 +414,7 @@
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
         <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
         <div class="inline-block align-bottom bg-gray-900 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-700/50">
-            <form id="formValidacion" action="{{ route('admin.congresos.pagos-terceros.update-estado', $pago->id) }}" method="POST">
+            <form id="formValidacion" action="{{ route('admin.concursos.pagos-terceros.update-estado', $pago->id) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="estado" id="estadoValidacion">
@@ -433,7 +434,6 @@
         </div>
     </div>
 </div>
-
 <script>
     function validarPago(estado) {
         const modal = document.getElementById('modalValidacion');
@@ -461,40 +461,7 @@
     function cerrarModal() {
         document.getElementById('modalValidacion').classList.add('hidden');
     }
-
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(function() {
-            // Mostrar notificación de éxito
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300';
-            notification.textContent = 'Código copiado al portapapeles';
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }).catch(function(err) {
-            console.error('Error al copiar: ', err);
-        });
-    }
-
-    // Animaciones de entrada
-    document.addEventListener('DOMContentLoaded', function() {
-        const cards = document.querySelectorAll('.bg-white, .dark\\:bg-gray-800');
-        cards.forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                card.style.transition = 'all 0.5s ease-out';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, index * 100);
-        });
-    });
 </script>
-
 @endsection
-
 
 
