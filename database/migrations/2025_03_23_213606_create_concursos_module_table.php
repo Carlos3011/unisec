@@ -72,84 +72,28 @@ return new class extends Migration
             $table->softDeletes();  // Permite el borrado suave de las imágenes.
         });
         
-        // 1. Creación de la tabla 'pagos_pre_registro' para registrar los pagos realizados antes del pre-registro
-        Schema::create('pagos_pre_registro', function (Blueprint $table) {
+        // 1. Creación de la tabla unificada 'pagos_paypal_concursos' para registrar pagos de PayPal tanto de pre-registro como inscripción
+        Schema::create('pagos_paypal_concursos', function (Blueprint $table) {
             $table->id();  // Clave primaria.
             $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');  // Relación con el usuario que realiza el pago
             $table->foreignId('concurso_id')->constrained('concursos')->onDelete('cascade');  // Relación con el concurso
+            
+            // Campo para identificar el tipo de pago
+            $table->enum('tipo_pago', ['pre_registro', 'inscripcion']);  // Tipo de pago
+            
+            // Campos específicos de PayPal
             $table->decimal('monto', 10, 2);  // Monto del pago.
-            $table->string('metodo_pago')->default('paypal');  // Método de pago, por defecto PayPal
+            $table->string('metodo_pago')->default('paypal');  // Método de pago, siempre PayPal
             $table->string('referencia_paypal')->nullable();  // Referencia de transacción en PayPal
             $table->string('paypal_order_id')->nullable();  // ID único de la orden en PayPal
-
             $table->enum('estado_pago', ['pendiente', 'pagado', 'rechazado'])->default('pendiente');  // Estado del pago.
             $table->timestamp('fecha_pago')->nullable();  // Fecha en que se realizó el pago
             $table->text('detalles_transaccion')->nullable();  // Detalles adicionales de la transacción en formato JSON
             $table->string('comprobante_pago')->nullable();  // Archivo o evidencia del pago
             $table->timestamps();  // Registra las fechas de creación y actualización.
-        });
-
-        // 2. Creación de la tabla 'pre_registro_concursos' para almacenar los pre-registros después del pago inicial
-        Schema::create('pre_registro_concursos', function (Blueprint $table) {
-            $table->id();  // Clave primaria.
-            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');  // Relación con la tabla 'users'
-            $table->foreignId('concurso_id')->constrained('concursos')->onDelete('cascade');  // Relación con la tabla 'concursos'
-            $table->foreignId('pago_pre_registro_id')->constrained('pagos_pre_registro')->onDelete('cascade');  // Relación con el pago previo
-            $table->string('nombre_equipo');  // Nombre del equipo.
-            $table->integer('integrantes')->unsigned()->default(1);  // Número de integrantes en el equipo.
-            $table->string('asesor')->nullable();  // Asesor del equipo (opcional).
-            $table->string('institucion')->nullable();  // Institución a la que pertenece el equipo (opcional).
-            // Campos para PDR
-            $table->string('archivo_pdr')->nullable();  // Archivo PDR
-            $table->enum('estado_pdr', ['pendiente', 'en revisión', 'aprobado', 'rechazado'])->default('pendiente');  // Estado de evaluación del PDR
-            $table->text('comentarios_pdr')->nullable();  // Comentarios sobre el PDR
-            // Campo JSON para almacenar los datos de los integrantes
-            $table->json('integrantes_data')->nullable();  // Almacena los datos de los integrantes en formato JSON
-            $table->string('codigo_pago_terceros')->nullable()->comment('FK lógico a pagos_terceros_transferencia_concurso');
-            $table->timestamps();  // Registra las fechas de creación y actualización.
-            $table->softDeletes();  // Permite el borrado suave de los pre-registros.
+            $table->softDeletes();  // Permite el borrado suave de los pagos.
         });
         
-        // 3. Creación de la tabla 'pagos_inscripcion' para registrar los pagos de inscripción después del pre-registro
-        Schema::create('pagos_inscripcion', function (Blueprint $table) {
-            $table->id();  // Clave primaria.
-            $table->foreignId('pre_registro_id')->constrained('pre_registro_concursos')->onDelete('cascade');  // Relación con el pre-registro
-            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');  // Relación con el usuario
-            $table->foreignId('concurso_id')->constrained('concursos')->onDelete('cascade');  // Relación con el concurso
-            $table->decimal('monto', 10, 2);  // Monto del pago.
-            $table->string('metodo_pago')->default('paypal');  // Método de pago, por defecto PayPal
-            $table->string('referencia_paypal')->nullable();  // Referencia de transacción en PayPal
-            $table->string('paypal_order_id')->nullable();  // ID único de la orden en PayPal
-            $table->enum('estado_pago', ['pendiente', 'pagado', 'rechazado'])->default('pendiente');  // Estado del pago.
-            $table->timestamp('fecha_pago')->nullable();  // Fecha en que se realizó el pago
-            $table->text('detalles_transaccion')->nullable();  // Detalles adicionales de la transacción en formato JSON
-            $table->string('comprobante_pago')->nullable();  // Archivo o evidencia del pago
-            $table->timestamps();  // Registra las fechas de creación y actualización.
-        });
-
-        // 4. Creación de la tabla 'inscripciones_concursos' para registrar las inscripciones después del pago de inscripción
-        Schema::create('inscripciones_concursos', function (Blueprint $table) {
-            $table->id();  // Clave primaria.
-            $table->foreignId('pre_registro_id')->constrained('pre_registro_concursos')->onDelete('cascade');  // Relación con el pre-registro
-            $table->foreignId('pago_inscripcion_id')->constrained('pagos_inscripcion')->onDelete('cascade');  // Relación con el pago de inscripción
-            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');  // Relación con la tabla 'users'
-            $table->foreignId('concurso_id')->constrained('concursos')->onDelete('cascade');  // Relación con la tabla 'concursos'
-            $table->enum('estado', ['pendiente', 'confirmada', 'cancelada'])->default('pendiente');  // Estado de la inscripción.
-            
-            // Campos para documentos adicionales
-            $table->string('archivo_cdr')->nullable();  // Archivo CDR 
-            $table->enum('estado_cdr', ['pendiente', 'en revisión', 'aprobado', 'rechazado'])->default('pendiente');
-            $table->text('comentarios_cdr')->nullable();
-            
-            $table->string('archivo_pfr')->nullable();  // Archivo PFR
-            $table->enum('estado_pfr', ['pendiente', 'en revisión', 'aprobado', 'rechazado'])->default('pendiente');
-            $table->text('comentarios_pfr')->nullable();
-            $table->string('codigo_pago_terceros')->nullable()->comment('FK lógico a pagos_terceros_transferencia_concurso');
-            
-            $table->timestamps();  // Registra las fechas de creación y actualización.
-            $table->softDeletes();  // Permite el borrado suave de las inscripciones.
-        });
-
         Schema::create('pagos_terceros_transferencia_concurso', function (Blueprint $table) {
             $table->id();
             $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');  // Relación con la tabla 'users'
@@ -171,6 +115,59 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+
+        // 2. Creación de la tabla 'pre_registro_concursos' para almacenar los pre-registros después del pago inicial
+        Schema::create('pre_registro_concursos', function (Blueprint $table) {
+            $table->id();  // Clave primaria.
+            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');  // Relación con la tabla 'users'
+            $table->foreignId('concurso_id')->constrained('concursos')->onDelete('cascade');  // Relación con la tabla 'concursos'
+            $table->foreignId('pago_paypal_id')->nullable()->constrained('pagos_paypal_concursos')->onDelete('cascade');  // Relación con el pago PayPal
+            $table->foreignId('pagos_terceros_transferencia_concurso_id')->nullable()->constrained('pagos_terceros_transferencia_concurso', 'id', 'pago_tercero_fk')->onDelete('cascade');  // Relación con el pago previo
+            $table->string('nombre_equipo');  // Nombre del equipo.
+            $table->integer('integrantes')->unsigned()->default(1);  // Número de integrantes en el equipo.
+            $table->string('asesor')->nullable();  // Asesor del equipo (opcional).
+            $table->string('institucion')->nullable();  // Institución a la que pertenece el equipo (opcional).
+            // Campos para PDR
+            $table->string('archivo_pdr')->nullable();  // Archivo PDR
+            $table->enum('estado_pdr', ['pendiente', 'en revisión', 'aprobado', 'rechazado'])->default('pendiente');  // Estado de evaluación del PDR
+            $table->text('comentarios_pdr')->nullable();  // Comentarios sobre el PDR
+            // Campo JSON para almacenar los datos de los integrantes
+            $table->json('integrantes_data')->nullable();  // Almacena los datos de los integrantes en formato JSON
+            $table->string('codigo_pago_terceros')->nullable()->comment('FK lógico a pagos_terceros_transferencia_concurso');
+            $table->timestamps();  // Registra las fechas de creación y actualización.
+            $table->softDeletes();  // Permite el borrado suave de los pre-registros.
+        });
+        
+        // 3. Tabla 'pagos_inscripcion' eliminada - ahora se usa 'pagos_paypal_concursos' unificada
+
+        // 4. Creación de la tabla 'inscripciones_concursos' para registrar las inscripciones después del pago de inscripción
+        Schema::create('inscripciones_concursos', function (Blueprint $table) {
+            $table->id();  // Clave primaria.
+            $table->foreignId('pre_registro_id')->constrained('pre_registro_concursos')->onDelete('cascade');  // Relación con el pre-registro
+            $table->foreignId('pago_paypal_inscripcion_id')->nullable()->constrained('pagos_paypal_concursos')->onDelete('cascade');  // Relación con el pago PayPal de inscripción
+            $table->foreignId('usuario_id')->constrained('users')->onDelete('cascade');  // Relación con la tabla 'users'
+            $table->foreignId('concurso_id')->constrained('concursos')->onDelete('cascade');  // Relación con la tabla 'concursos'
+            $table->enum('estado', ['pendiente', 'confirmada', 'cancelada'])->default('pendiente');  // Estado de la inscripción.
+            
+            // Campos para documentos adicionales
+            $table->string('archivo_cdr')->nullable();  // Archivo CDR 
+            $table->enum('estado_cdr', ['pendiente', 'en revisión', 'aprobado', 'rechazado'])->default('pendiente');
+            $table->text('comentarios_cdr')->nullable();
+            
+            $table->string('archivo_pfr')->nullable();  // Archivo PFR
+            $table->enum('estado_pfr', ['pendiente', 'en revisión', 'aprobado', 'rechazado'])->default('pendiente');
+            $table->text('comentarios_pfr')->nullable();
+            $table->string('codigo_pago_terceros')->nullable()->comment('FK lógico a pagos_terceros_transferencia_concurso');
+            
+            $table->timestamps();  // Registra las fechas de creación y actualización.
+            $table->softDeletes();  // Permite el borrado suave de las inscripciones.
+        });
+
+        // Agregar la clave foránea pre_registro_id a pagos_paypal_concursos después de crear pre_registro_concursos
+        Schema::table('pagos_paypal_concursos', function (Blueprint $table) {
+            $table->foreignId('pre_registro_id')->nullable()->constrained('pre_registro_concursos')->onDelete('cascade');  // Relación con el pre-registro (solo para pagos de inscripción)
+        });
+        
     }
 
     /**
@@ -181,9 +178,10 @@ return new class extends Migration
         // Eliminación de las tablas creadas en orden inverso para respetar las restricciones de clave foránea
         Schema::dropIfExists('inscripciones_concursos');
         Schema::dropIfExists('pagos_inscripcion');
-        Schema::dropIfExists('pre_registro_concursos');
         Schema::dropIfExists('pagos_pre_registro');
+        Schema::dropIfExists('pre_registro_concursos');
         Schema::dropIfExists('pagos_terceros_transferencia_concurso');
+        Schema::dropIfExists('pagos_paypal_concursos');
         Schema::dropIfExists('imagenes_concursos');
         Schema::dropIfExists('fechas_importantes_concursos');
         Schema::dropIfExists('convocatorias_concursos');

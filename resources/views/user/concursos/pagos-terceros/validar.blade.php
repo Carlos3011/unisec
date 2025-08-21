@@ -104,9 +104,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     showCancelButton: true,
                     confirmButtonText: 'Sí, continuar',
                     cancelButtonText: 'No, cancelar'
-                }).then((result) => {
-                    if (result.isConfirmed && data.concurso_id) {
-                        window.location.href = '{{ route("user.concursos.pre-registros.create", "") }}/' + data.concurso_id;
+                }).then((swalResult) => {
+                    if (swalResult.isConfirmed && result.convocatoria_id) {
+                        window.location.href = '{{ route("user.concursos.pre-registros.create", "") }}/' + result.convocatoria_id;
                     }
                 });
             } else {

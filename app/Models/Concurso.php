@@ -15,7 +15,6 @@ class Concurso extends Model
     protected $fillable = [
         'titulo',
         'categoria_id',
-    
         'estado'
     ];
 
@@ -52,5 +51,29 @@ class Concurso extends Model
     public function pagos()
     {
         return $this->hasManyThrough(PagoConcurso::class, InscripcionConcurso::class);
+    }
+
+    /**
+     * Obtiene todos los pagos de PayPal relacionados con este concurso
+     */
+    public function pagosPaypal()
+    {
+        return $this->hasMany(PagoPaypalConcurso::class);
+    }
+
+    /**
+     * Obtiene los pagos de pre-registro de PayPal
+     */
+    public function pagosPreRegistroPaypal()
+    {
+        return $this->hasMany(PagoPaypalConcurso::class)->preRegistro();
+    }
+
+    /**
+     * Obtiene los pagos de inscripción de PayPal
+     */
+    public function pagosInscripcionPaypal()
+    {
+        return $this->hasMany(PagoPaypalConcurso::class)->inscripcion();
     }
 }

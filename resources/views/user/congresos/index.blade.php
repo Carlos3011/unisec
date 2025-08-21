@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 sm:px-6 py-16 min-h-screen" x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 100)">
     <div class="relative mb-12 text-center">
         <h1 class="text-5xl font-black bg-gradient-to-r from-orange-400 to-amber-300 bg-clip-text text-transparent mb-2 relative z-10 tracking-tight">Congresos Activos</h1>
-        <p class="text-orange-200 text-lg">Participa en Nuestro Primer Pongreso</p>
+        <p class="text-orange-200 text-lg">Participa en Nuestro Primer Congreso</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">

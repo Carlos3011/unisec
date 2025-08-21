@@ -5,23 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\PagoPreRegistro;
+use App\Models\PagoPaypalConcurso;
 
 class PreRegistroConcurso extends Model
 {
     use HasFactory, SoftDeletes;
-
-    public function pagoPreRegistro()
-    {
-        return $this->belongsTo(PagoPreRegistro::class);
-    }
 
     protected $table = 'pre_registro_concursos';
 
     protected $fillable = [
         'usuario_id',
         'concurso_id',
-        'pago_pre_registro_id',
+        'pago_paypal_id',
+        'pagos_terceros_transferencia_concurso_id',
         'nombre_equipo',
         'integrantes',
         'asesor',
@@ -39,6 +35,7 @@ class PreRegistroConcurso extends Model
         'estado_pdr' => 'string',
         'integrantes_data' => 'array'
     ];
+    
     const ESTADO_PDR_PENDIENTE = 'pendiente';
     const ESTADO_PDR_EN_REVISION = 'en revisión';
     const ESTADO_PDR_APROBADO = 'aprobado';
@@ -50,21 +47,28 @@ class PreRegistroConcurso extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class);
- 
     }
-    // public function pagoPreRegistro()
-    // {
-    //     return $this->belongsTo(PagoPreRegistro::class, 'pago_pre_registro_id');
-    // }
+
+    /**
+     * Obtiene el pago de PayPal asociado al pre-registro.
+     */
+    public function pagoPaypal()
+    {
+        return $this->belongsTo(PagoPaypalConcurso::class, 'pago_paypal_id');
+    }
 
     public function inscripcion()
     {
         return $this->hasOne(InscripcionConcurso::class);
     }
 
+    /**
+     * Obtiene el pago de inscripción asociado (PayPal).
+     */
     public function pagoInscripcion()
     {
-        return $this->hasOne(PagoInscripcion::class);
+        return $this->hasOne(PagoPaypalConcurso::class, 'pre_registro_id')
+                    ->where('tipo_pago', PagoPaypalConcurso::TIPO_INSCRIPCION);
     }
 
     /**
@@ -89,5 +93,13 @@ class PreRegistroConcurso extends Model
     public function pagoTercero()
     {
         return $this->belongsTo(PagoTerceroTransferenciaConcurso::class, 'codigo_pago_terceros', 'codigo_validacion_unico');
+    }
+
+    /**
+     * Obtiene el pago por tercero asociado directamente al pre-registro.
+     */
+    public function pagoTerceroTransferencia()
+    {
+        return $this->belongsTo(PagoTerceroTransferenciaConcurso::class, 'pagos_terceros_transferencia_concurso_id');
     }
 }

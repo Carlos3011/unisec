@@ -71,6 +71,11 @@
                             </div>
                         </div>
 
+                        <a href="{{ route('user.congresos.pagos-terceros.create') }}" 
+                           class="w-full py-3 px-4 bg-white/60 border border-gray-300 text-gray-700 font-semibold rounded-lg text-center hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fas fa-university text-blue-600"></i>
+                            <span>Transferencia Bancaria</span>
+                        </a>
                     </div>
                 </div>
 

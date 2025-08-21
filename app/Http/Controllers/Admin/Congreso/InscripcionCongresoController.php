@@ -40,7 +40,7 @@ class InscripcionCongresoController extends Controller
             });
         }
 
-        $inscripciones = $query->latest()->get();
+        $inscripciones = $query->latest()->paginate(10);
 
         return view('admin.congresos.inscripciones.index', compact('inscripciones'));
     }

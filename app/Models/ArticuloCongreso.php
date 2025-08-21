@@ -17,6 +17,7 @@ class ArticuloCongreso extends Model
         'usuario_id',
         'congreso_id',
         'convocatoria_congreso_id',
+        'pago_paypal_id',
         'titulo',
         'autores_data',
         'archivo_articulo',
@@ -24,7 +25,8 @@ class ArticuloCongreso extends Model
         'estado_articulo',
         'estado_extenso',
         'comentarios_articulo',
-        'comentarios_extenso'
+        'comentarios_extenso',
+        'codigo_pago_terceros'
     ];
 
     protected $casts = [
@@ -59,5 +61,75 @@ class ArticuloCongreso extends Model
     public function pagosInscripcion(): HasMany
     {
         return $this->hasMany(PagoInscripcionCongreso::class, 'articulo_id');
+    }
+
+    // Relación con el pago PayPal del artículo
+    public function pagoPaypal(): BelongsTo
+    {
+        return $this->belongsTo(PagoPaypalCongreso::class, 'pago_paypal_id');
+    }
+
+    // Relación con el pago de terceros usando el código
+    public function pagoTerceros()
+    {
+        return $this->belongsTo(PagoTerceroTransferenciaCongreso::class, 'codigo_pago_terceros', 'codigo_validacion_unico');
+    }
+
+    /**
+     * Verificar si el artículo tiene un pago válido
+     */
+    public function tienePagoValido()
+    {
+        // Verificar pago PayPal
+        if ($this->pago_paypal_id && $this->pagoPaypal && $this->pagoPaypal->estaPagado()) {
+            return true;
+        }
+
+        // Verificar pago de terceros
+        if ($this->codigo_pago_terceros && $this->pagoTerceros && $this->pagoTerceros->estaValidado()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Obtener el tipo de pago utilizado
+     */
+    public function getTipoPagoAttribute()
+    {
+        if ($this->pago_paypal_id) {
+            return 'paypal';
+        }
+        if ($this->codigo_pago_terceros) {
+            return 'terceros';
+        }
+        return 'sin_pago';
+    }
+
+    /**
+     * Obtener información del pago
+     */
+    public function getInfoPagoAttribute()
+    {
+        if ($this->pago_paypal_id && $this->pagoPaypal) {
+            return [
+                'tipo' => 'PayPal',
+                'monto' => $this->pagoPaypal->monto,
+                'estado' => $this->pagoPaypal->nombre_estado_pago,
+                'fecha' => $this->pagoPaypal->fecha_pago
+            ];
+        }
+
+        if ($this->codigo_pago_terceros && $this->pagoTerceros) {
+            return [
+                'tipo' => 'Terceros',
+                'monto' => $this->pagoTerceros->monto_total,
+                'estado' => $this->pagoTerceros->nombre_estado_pago,
+                'codigo' => $this->pagoTerceros->codigo_validacion_unico
+            ];
+        }
+
+        return null;
     }
 }

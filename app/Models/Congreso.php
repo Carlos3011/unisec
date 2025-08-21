@@ -49,4 +49,38 @@ class Congreso extends Model
     {
         return $this->hasMany(PagoInscripcionCongreso::class, 'congreso_id');
     }
+
+    // Relación con pagos PayPal del congreso
+    public function pagosPaypal(): HasMany
+    {
+        return $this->hasMany(PagoPaypalCongreso::class, 'congreso_id');
+    }
+
+    // Relación con pagos de terceros del congreso
+    public function pagosTerceros(): HasMany
+    {
+        return $this->hasMany(PagoTerceroTransferenciaCongreso::class, 'congreso_id');
+    }
+
+    // Relación con inscripciones del congreso
+    public function inscripciones(): HasMany
+    {
+        return $this->hasMany(InscripcionCongreso::class, 'congreso_id');
+    }
+
+    /**
+     * Obtener todos los pagos PayPal de artículos para este congreso
+     */
+    public function pagosPaypalArticulos()
+    {
+        return $this->pagosPaypal()->where('tipo_pago', PagoPaypalCongreso::TIPO_ARTICULO);
+    }
+
+    /**
+     * Obtener todos los pagos PayPal de inscripciones para este congreso
+     */
+    public function pagosPaypalInscripciones()
+    {
+        return $this->pagosPaypal()->where('tipo_pago', PagoPaypalCongreso::TIPO_INSCRIPCION);
+    }
 }

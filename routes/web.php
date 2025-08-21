@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\Concurso\ConcursoController;
 use App\Http\Controllers\Admin\Concurso\ConvocatoriaConcursoController;
 use App\Http\Controllers\Admin\Concurso\PreRegistroConcursoController;
 use App\Http\Controllers\Admin\AdminPagoTerceroController;
+use App\Http\Controllers\AdminPagoTerceroCongresoController;
 
 use App\Http\Controllers\User\Concurso\ConcursoUserController;
 use App\Http\Controllers\User\Concurso\ConvocatoriaUserController;
@@ -177,9 +178,19 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/reportes-estadisticas', [AdminController::class, 'reportesEstadisticas'])->name('admin.reportes-estadisticas');
 
     // Rutas para la gestión de pagos de terceros
-    Route::get('/admin/pagos-terceros', [AdminPagoTerceroController::class, 'index'])->name('admin.pagos-terceros.index');
-    Route::get('/admin/pagos-terceros/{pago}', [AdminPagoTerceroController::class, 'show'])->name('admin.pagos-terceros.show');
-    Route::put('/admin/pagos-terceros/{pago}/estado', [AdminPagoTerceroController::class, 'updateEstado'])->name('admin.pagos-terceros.update-estado');
+    Route::get('/admin/concursos/pagos-terceros', [AdminPagoTerceroController::class, 'index'])->name('admin.concursos.pagos-terceros.index');
+    Route::get('/admin/concursos/pagos-terceros/create', [AdminPagoTerceroController::class, 'create'])->name('admin.concursos.pagos-terceros.create');
+    Route::post('/admin/concursos/pagos-terceros', [AdminPagoTerceroController::class, 'store'])->name('admin.concursos.pagos-terceros.store');
+    Route::get('/admin/concursos/pagos-terceros/{pago}', [AdminPagoTerceroController::class, 'show'])->name('admin.concursos.pagos-terceros.show');
+    Route::put('/admin/concursos/pagos-terceros/{pago}/estado', [AdminPagoTerceroController::class, 'updateEstado'])->name('admin.concursos.pagos-terceros.update-estado');
+    Route::get('/admin/concursos/pagos-terceros/precios/{concurso}', [AdminPagoTerceroController::class, 'obtenerPrecios'])->name('admin.concursos.pagos-terceros.precios');
+
+    // Rutas para la gestión de pagos de terceros de congresos
+    Route::get('/admin/congresos/pagos-terceros', [AdminPagoTerceroCongresoController::class, 'index'])->name('admin.congresos.pagos-terceros.index');
+    Route::get('/admin/congresos/pagos-terceros/create', [AdminPagoTerceroCongresoController::class, 'create'])->name('admin.congresos.pagos-terceros.create');
+    Route::post('/admin/congresos/pagos-terceros', [AdminPagoTerceroCongresoController::class, 'store'])->name('admin.congresos.pagos-terceros.store');
+    Route::get('/admin/congresos/pagos-terceros/{pago}', [AdminPagoTerceroCongresoController::class, 'show'])->name('admin.congresos.pagos-terceros.show');
+    Route::put('/admin/congresos/pagos-terceros/{pago}/estado', [AdminPagoTerceroCongresoController::class, 'updateEstado'])->name('admin.congresos.pagos-terceros.update-estado');
 
     // Rutas para la gestión de pagos de pre-registro
     Route::get('/admin/pagos', [PagoPreRegistroController::class, 'index'])->name('admin.pagos.index');
@@ -317,6 +328,17 @@ Route::middleware(['auth', 'role:usuario'])->group(function () {
     Route::post('/user/pagos-terceros/validar-codigo', [PagoTerceroController::class, 'validarCodigo'])->name('user.concursos.pagos-terceros.validar-codigo');
     Route::post('/user/pagos-terceros/usar-codigo-pre-registro/{preRegistro}', [PagoTerceroController::class, 'usarCodigoEnPreRegistro'])->name('user.concursos.pagos-terceros.usar-codigo-pre-registro');
     Route::post('/user/pagos-terceros/usar-codigo-inscripcion/{inscripcion}', [PagoTerceroController::class, 'usarCodigoEnInscripcion'])->name('user.concursos.pagos-terceros.usar-codigo-inscripcion');
+
+    // Rutas para la gestión de pagos por terceros en congresos
+    Route::get('/user/congresos/pagos-terceros/validar', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'validar'])->name('user.congresos.pagos-terceros.validar');
+    Route::get('/user/congresos/pagos-terceros', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'index'])->name('user.congresos.pagos-terceros.index');
+    Route::get('/user/congresos/pagos-terceros/create', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'create'])->name('user.congresos.pagos-terceros.create');
+    Route::post('/user/congresos/pagos-terceros', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'store'])->name('user.congresos.pagos-terceros.store');
+    Route::get('/user/congresos/pagos-terceros/{pago}', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'show'])->name('user.congresos.pagos-terceros.show');
+
+    Route::post('/user/congresos/pagos-terceros/validar', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'validarCodigo'])->name('user.congresos.pagos-terceros.validar-codigo');
+    Route::post('/user/congresos/pagos-terceros/usar-codigo-inscripcion/{inscripcion}', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'usarCodigoEnInscripcion'])->name('user.congresos.pagos-terceros.usar-codigo-inscripcion');
+    Route::post('/user/congresos/pagos-terceros/usar-codigo-articulo/{articulo}', [\App\Http\Controllers\User\Congreso\PagoTerceroCongresoController::class, 'usarCodigoEnArticulo'])->name('user.congresos.pagos-terceros.usar-codigo-articulo');
 
     Route::get('/user/inscripciones', [UserController::class, 'inscripciones'])->name('user.inscripciones');
     Route::get('/user/certificados', [UserController::class, 'certificados'])->name('user.certificados');

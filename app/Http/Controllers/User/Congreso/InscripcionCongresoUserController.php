@@ -5,15 +5,16 @@ namespace App\Http\Controllers\User\Congreso;
 use App\Http\Controllers\Controller;
 use App\Models\InscripcionCongreso;
 use App\Models\Congreso;
-use App\Models\ConvocatoriaCongreso;
 use App\Models\PagoInscripcionCongreso;
 use App\Models\ArticuloCongreso;
+use App\Models\ConvocatoriaCongreso;
+use App\Models\PagoTerceroTransferenciaCongreso;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class InscripcionCongresoUserController extends Controller
 {
@@ -37,7 +38,7 @@ class InscripcionCongresoUserController extends Controller
 
     public function create($convocatoria)
     {
-        $convocatoria = ConvocatoriaCongreso::findOrFail($convocatoria);
+        $convocatoria = ConvocatoriaCongreso::with('congreso')->findOrFail($convocatoria);
         $congreso = $convocatoria->congreso;
         $congresos = collect([$congreso]);
         
@@ -54,12 +55,24 @@ class InscripcionCongresoUserController extends Controller
             'institucion' => 'required|string|max:255',
             'comprobante_estudiante' => 'required_if:tipo_participante,estudiante|file|mimes:pdf,jpg,jpeg,png|max:2048',
             'archivo_articulo' => 'nullable|file|mimes:pdf|max:10240',
-            'titulo_articulo' => 'required_if:archivo_articulo,!=,null|string|max:255',
-            'autores' => 'required_if:archivo_articulo,!=,null|array',
-            'autores.*.nombre' => 'required_if:archivo_articulo,!=,null|string|max:255',
-            'autores.*.correo' => 'required_if:archivo_articulo,!=,null|email|max:255',
-            'autores.*.institucion' => 'required_if:archivo_articulo,!=,null|string|max:255'
+            'titulo_articulo' => 'nullable|string|max:255',
+            'autores' => 'nullable|array',
+            'autores.*.nombre' => 'nullable|string|max:255',
+            'autores.*.correo' => 'nullable|email|max:255',
+            'autores.*.institucion' => 'nullable|string|max:255',
+            'codigo_pago_terceros' => 'nullable|string|max:100'
         ]);
+
+        // Validación condicional: si se sube archivo de artículo, los campos del artículo son requeridos
+        if ($request->hasFile('archivo_articulo')) {
+            $request->validate([
+                'titulo_articulo' => 'required|string|max:255',
+                'autores' => 'required|array|min:1',
+                'autores.*.nombre' => 'required|string|max:255',
+                'autores.*.correo' => 'required|email|max:255',
+                'autores.*.institucion' => 'required|string|max:255',
+            ]);
+        }
 
         // Verificar si el usuario ya tiene una inscripción activa para este congreso
         $existingInscripcion = InscripcionCongreso::where('usuario_id', Auth::id())
@@ -72,15 +85,28 @@ class InscripcionCongresoUserController extends Controller
                 ->with('error', 'Ya tienes una inscripción para este congreso.');
         }
 
-        // Validar pago confirmado
+        // Validar pago confirmado (PagoInscripcionCongreso) o pago de terceros validado
+        $pagoConfirmado = null;
+        $pagoTerceroValidado = null;
+        
+        // Verificar pago de inscripción confirmado
         $pagoConfirmado = PagoInscripcionCongreso::where('usuario_id', Auth::id())
             ->where('congreso_id', $request->congreso_id)
             ->where('estado_pago', 'pagado')
             ->first();
+        
+        // Verificar pago de terceros validado si se proporciona código
+        if ($request->codigo_pago_terceros) {
+            $pagoTerceroValidado = PagoTerceroTransferenciaCongreso::where('codigo_validacion_unico', $request->codigo_pago_terceros)
+                ->where('congreso_id', $request->congreso_id)
+                ->where('estado_pago', 'validado')
+                ->where('cubre_inscripcion', true)
+                ->first();
+        }
 
-        if (!$pagoConfirmado) {
+        if (!$pagoConfirmado && !$pagoTerceroValidado) {
             return redirect()->back()
-                ->with('error', 'Debe tener un pago confirmado para realizar la inscripción');
+                ->with('error', 'Debe tener un pago confirmado o un código de pago de terceros validado para realizar la inscripción');
         }
 
         // Crear el artículo si se proporcionó el archivo
@@ -100,18 +126,28 @@ class InscripcionCongresoUserController extends Controller
         }
 
         // Crear la inscripción
-        $inscripcion = InscripcionCongreso::create([
+        $inscripcionData = [
             'usuario_id' => Auth::id(),
             'congreso_id' => $request->congreso_id,
             'convocatoria_congreso_id' => $request->convocatoria_id,
             'tipo_participante' => $request->tipo_participante,
             'institucion' => $request->institucion,
             'articulo_id' => $articuloId,
-            'pago_inscripcion_id' => $pagoConfirmado->id,
             'comprobante_estudiante' => $request->hasFile('comprobante_estudiante') 
                 ? $this->storeFile($request->file('comprobante_estudiante'), 'comprobantes_estudiante') 
                 : null
-        ]);
+        ];
+        
+        // Asignar el tipo de pago correspondiente
+        if ($pagoConfirmado) {
+            $inscripcionData['pago_inscripcion_id'] = $pagoConfirmado->id;
+        }
+        
+        if ($pagoTerceroValidado) {
+            $inscripcionData['codigo_pago_terceros'] = $request->codigo_pago_terceros;
+        }
+        
+        $inscripcion = InscripcionCongreso::create($inscripcionData);
 
         if ($request->ajax()) {
             return response()->json([
@@ -233,11 +269,33 @@ class InscripcionCongresoUserController extends Controller
 
     public function factura(InscripcionCongreso $inscripcion)
     {
+        // Verificar si es un pago PayPal o pago de terceros
+        if ($inscripcion->pago_inscripcion_id) {
+            // Pago PayPal
+            $pago = PagoInscripcionCongreso::with(['usuario', 'congreso'])
+                ->findOrFail($inscripcion->pago_inscripcion_id);
+            return $this->generarFacturaPayPal($pago, $inscripcion);
+        } elseif ($inscripcion->codigo_pago_terceros) {
+            // Pago de terceros
+            $pagoTercero = PagoTerceroTransferenciaCongreso::with(['usuario', 'congreso'])
+                ->where('codigo_validacion_unico', $inscripcion->codigo_pago_terceros)
+                ->where('congreso_id', $inscripcion->congreso_id)
+                ->where('estado_pago', 'validado')
+                ->firstOrFail();
+            return $this->generarFacturaTerceros($pagoTercero, $inscripcion);
+        }
         
-        $pago = PagoInscripcionCongreso::with(['usuario', 'congreso'])
-            ->findOrFail($inscripcion->pago_inscripcion_id);
+        return redirect()->back()->with('error', 'No se encontró información de pago para generar la factura.');
+    }
 
+    private function generarFacturaPayPal($pago, $inscripcion = null)
+    {
         $detalles = json_decode($pago->detalles_transaccion, true);
+
+        // Obtener información de la inscripción si no se proporciona
+        if (!$inscripcion) {
+            $inscripcion = InscripcionCongreso::where('pago_inscripcion_id', $pago->id)->first();
+        }
 
         $datosFactura = [
             'id' => $pago->id,
@@ -250,6 +308,10 @@ class InscripcionCongresoUserController extends Controller
             'estado_pago' => $pago->estado_pago,
             'fecha_pago' => $pago->fecha_pago ? Carbon::parse($pago->fecha_pago)->format('Y-m-d H:i:s') : null,
             'paypal_order_id' => $detalles['id'] ?? null,
+            // Información del participante
+            'tipo_participante' => $inscripcion ? ucfirst($inscripcion->tipo_participante) : 'No especificado',
+            'institucion' => $inscripcion ? $inscripcion->institucion : 'No especificada',
+            'fecha_inscripcion' => $inscripcion ? Carbon::parse($inscripcion->created_at)->format('Y-m-d H:i:s') : null,
             'paypal_status' => $detalles['status'] ?? null,
             'paypal_intent' => $detalles['intent'] ?? null,
             'payee' => [
@@ -294,6 +356,44 @@ class InscripcionCongresoUserController extends Controller
 
         $pdf = PDF::loadView('factura-congreso', ['datos' => $datosFactura]);
         return $pdf->download('ticket_'.$pago->id.'.pdf');
+    }
+
+    private function generarFacturaTerceros($pagoTercero, $inscripcion = null)
+    {
+        // Obtener información de la inscripción si no se proporciona
+        if (!$inscripcion) {
+            $inscripcion = InscripcionCongreso::where('codigo_pago_terceros', $pagoTercero->codigo_validacion_unico)
+                ->where('congreso_id', $pagoTercero->congreso_id)
+                ->first();
+        }
+
+        $datosFactura = [
+            'id' => $pagoTercero->id,
+            'usuario' => $pagoTercero->usuario->name,
+            'email' => $pagoTercero->usuario->email,
+            'congreso' => $pagoTercero->congreso->nombre,
+            'monto' => $pagoTercero->monto_total,
+            'metodo_pago' => 'Transferencia Bancaria',
+            'referencia_transferencia' => $pagoTercero->referencia_transferencia,
+            'estado_pago' => $pagoTercero->estado_pago,
+            'fecha_pago' => $pagoTercero->fecha_pago ? Carbon::parse($pagoTercero->fecha_pago)->format('Y-m-d H:i:s') : null,
+            // Información del participante
+            'tipo_participante' => $inscripcion ? ucfirst($inscripcion->tipo_participante) : 'No especificado',
+            'institucion' => $inscripcion ? $inscripcion->institucion : 'No especificada',
+            'fecha_inscripcion' => $inscripcion ? Carbon::parse($inscripcion->created_at)->format('Y-m-d H:i:s') : null,
+            'tipo_tercero' => $pagoTercero->tipo_tercero,
+            'nombre_tercero' => $pagoTercero->nombre_tercero,
+            'rfc_tercero' => $pagoTercero->rfc_tercero,
+            'contacto_tercero' => $pagoTercero->contacto_tercero,
+            'correo_tercero' => $pagoTercero->correo_tercero,
+            'codigo_validacion' => $pagoTercero->codigo_validacion_unico,
+            'cubre_inscripcion' => $pagoTercero->cubre_inscripcion,
+            'paypal_order_id' => 'TERCERO-' . $pagoTercero->codigo_validacion_unico,
+            'create_time' => $pagoTercero->created_at ? $pagoTercero->created_at->format('Y-m-d\\TH:i:s\\Z') : null
+        ];
+
+        $pdf = PDF::loadView('factura-congreso', ['datos' => $datosFactura]);
+        return $pdf->download('ticket_tercero_'.$pagoTercero->id.'.pdf');
     }
 
     private function storeFile($file, $directory)
@@ -350,4 +450,4 @@ class InscripcionCongresoUserController extends Controller
 
         return response()->download(public_path($articulo->archivo_extenso));
     }
-} 
+}
